@@ -13,7 +13,7 @@ with corresponding geometry pickled in
 ```
   HelicalSkullCT_70100644Phantom_no_bed_Turn_{0,1,2,3,...,22}.geometry.p
 ```  
-Files to read and reconstruct these are given in this repository (the easiest example is given by a FBP reconstruction in ```HelicalSkullCT_Reconstruction_FBP.py```). Also, most of the data handling is hidden in ```adutils.py```. To make use of these, simply run the following in your script
+Files to read and reconstruct these are given in this repository (the easiest example is given by a FBP reconstruction in ```FBP_reco_skullCT.py```). Most of the data handling is however hidden in ```adutils.py```. To make use of these, simply run the following in your script
 ```
   from adutils import *
 ```  
