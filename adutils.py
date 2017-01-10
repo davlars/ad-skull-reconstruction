@@ -1,37 +1,50 @@
 """
-Utility function to read simulated skull CT data and get correct geomtry for reconstruction, as well as an fbp defintion (from odl)
+Utility function to read simulated skull CT data.
+
+Also fetches correct geomtry for reconstruction and provides a fbp defintion.
 """
 import odl
 import numpy as np
 import os
-import nibabel as nib
+import sys
+import glob
+import shutil
 import pickle
 
-
-filePath = '/lcrnas/data/Simulated/120kV/'
+dir_path = os.path.dirname(os.path.realpath(__file__))
+data_path = os.path.join(dir_path, 'data', 'Simulated', '120kV')
 fileStart = 'HelicalSkullCT_70100644Phantom_no_bed_'
 nTurns = 23
+PY3 = (sys.version_info > (3, 0))
 
 
-def getPhantomSize(phantomName):
-    # nifit data
-    path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
-    nii = nib.load(path+phantomName)
-    phantomdata = nii.get_data()
-    phantomSize = np.shape(phantomdata)
-    return phantomSize
+def load_data_from_nas(nas_path):
+    """Load all the needed data from the nas onto your local machine
+
+    This makes loading files much faster.
+
+    Usage on windows where nas is bound to "Z:\"
+
+    python -c "import adutils; adutils.load_data_from_nas('Z:\\')"
+    """
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+
+    nas_data_path = os.path.join(nas_path, 'Simulated', '120kV')
+    if not os.path.exists(nas_path):
+        raise IOError('Cannot find NAS data at {}'.format(nas_data_path))
+
+    for filename in glob.glob(os.path.join(nas_data_path, '*.*')):
+        shutil.copy(filename, data_path)
 
 
 def get_discretization():
-    phantomName = '70100644Phantom_labelled_no_bed.nii'
-
     # Set geometry for discretization
     volumeSize = np.array([230.0, 230.0, 141.0546875])
     volumeOrigin = np.array([-115.0, -115.0, 0])
 
     # Discretization parameters
-    phantomSize = getPhantomSize(phantomName)
-    nVoxels = np.array(phantomSize)
+    nVoxels = np.array([512, 512, 314])
 
     # Discrete reconstruction space
     reco_space = odl.uniform_discr(volumeOrigin,
@@ -49,12 +62,21 @@ def get_ray_trafo(reco_space, use_subset=False):
 
     Aops = []
 
+    if not os.path.exists(data_path):
+        raise IOError('Could not find files at {}, have you run '
+                      'adutils.load_data_from_nas()'.format(data_path))
+
     for turn in turns:
         print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
-        geomFile = os.path.join(filePath, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
+        geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
+
         # Load pickled geometry (small workaround of incompatibility between Python2/Python3 in pickle)
         with open(geomFile, 'rb') as f:
-            geom = pickle.load(f, encoding='latin1')
+            if PY3:
+                geom = pickle.load(f, encoding='latin1')
+            else:
+                geom = pickle.load(f)
+
         # X-ray transform
         Aops.append(odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda'))
 
@@ -80,19 +102,17 @@ def get_data(A, use_subset=False):
     else:
         turns = range(nTurns)
 
+    if not os.path.exists(data_path):
+        raise IOError('Could not find files at {}, have you run '
+                      'adutils.load_data_from_nas()'.format(data_path))
+
     imagesTurn = []
     for turn in turns:
         print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
-        dataFile = os.path.join(filePath, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
+        dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
         projections = np.load(dataFile).astype('float32')
         imagesTurn.append(-np.log(projections / 7910))
 
     rhs = A.range.element(imagesTurn)
 
     return rhs
-
-
-
-
-
-

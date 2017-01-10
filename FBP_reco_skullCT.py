@@ -9,16 +9,21 @@ import adutils
 reco_space = adutils.get_discretization()
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space)
+A = adutils.get_ray_trafo(reco_space, use_subset=True)
 
 # Define fbp
 fbp = adutils.get_fbp(A)
 
 # Data
-rhs = adutils.get_data(A)
+rhs = adutils.get_data(A, use_subset=True)
 
 # Reconstruct
 x = fbp(rhs)
+
+# Show result
+x.show(coords=[None, 0, None])
+x.show(coords=[0, None, None])
+x.show(coords=[None, None, 90])
 
 # Save
 if False:
