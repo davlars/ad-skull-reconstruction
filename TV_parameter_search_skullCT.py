@@ -74,7 +74,7 @@ for lamb in lambs:
 
     # Run such that every 5th iteration is saved (saveCont == 1) or only the last one (saveCont == 0)
     saveCont = 1
-    savePath = '/lcrnas/data/Simulated/120kV/'
+    savePath = '/home/user/Simulated/120kV/'
 
     if saveCont == 0:
         niter = 100

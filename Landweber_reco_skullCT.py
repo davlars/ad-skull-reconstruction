@@ -36,7 +36,7 @@ if not saveCont:
     niter = 5
     odl.solvers.landweber(A, x, rhs, niter=niter, omega=omega, callback = callbackPrintIter)
     if False:
-        saveName = '/lcrnas/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_' + str(niter) + 'iterations.npy'
+        saveName = '/home/user/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_' + str(niter) + 'iterations.npy'
         np.save(saveName,np.asarray(x))
 else:
     startiter = 5
@@ -44,7 +44,7 @@ else:
     stepiter = 5
     niter = [int(i) for i in np.arange(startiter,enditer,stepiter)]
     saveNameStart = 'Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_'
-    savePath = os.path.join('/lcrnas/data/Simulated/120kV/','reco',saveNameStart)
+    savePath = os.path.join('/home/user/data/Simulated/120kV/','reco',saveNameStart)
     for iterations in niter:
         odl.solvers.landweber(A, x, rhs, niter=stepiter, omega=omega,
                               callback=callbackPrintIter)

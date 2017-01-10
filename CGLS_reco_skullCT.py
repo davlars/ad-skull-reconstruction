@@ -34,7 +34,7 @@ if not saveCont:
     niter = 5
     odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbackPrintIter)
     if False:
-        saveName = '/lcrnas/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations.npy'
+        saveName = '/home/user/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations.npy'
         np.save(saveName,np.asarray(x))
 
 else:
@@ -47,6 +47,6 @@ else:
                                               callback=callbackPrintIter)
         if False:
             saveNameStart = 'Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_'
-            savePath = os.path.join('/lcrnas/data/Simulated/120kV/','reco',saveNameStart)
+            savePath = os.path.join('/home/user/Simulated/120kV/','reco',saveNameStart)
             saveName = (savePath + '{}iterations'.format(iterations) + '.npy')
             np.save(saveName, np.asarray(x))

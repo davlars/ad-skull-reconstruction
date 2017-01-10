@@ -27,5 +27,5 @@ x.show(coords=[None, None, 90])
 
 # Save
 if False:
-    saveName = '/lcrnas/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_FBP.npy'
+    saveName = '/home/user/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_FBP.npy'
     np.save(saveName, np.asarray(x))
