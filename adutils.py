@@ -13,12 +13,12 @@ fileStart = 'HelicalSkullCT_70100644Phantom_no_bed_'
 nTurns = 23
 
 def getPhantomSize(phantomName):
-        #nifit data 
-        path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
-        nii = nib.load(path+phantomName)
-        phantomdata = nii.get_data()
-        phantomSize = np.shape(phantomdata)
-        return phantomSize
+    #nifit data 
+    path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
+    nii = nib.load(path+phantomName)
+    phantomdata = nii.get_data()
+    phantomSize = np.shape(phantomdata)
+    return phantomSize
         
 def get_discretization():
     phantomName = '70100644Phantom_labelled_no_bed.nii'
