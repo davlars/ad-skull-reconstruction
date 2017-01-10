@@ -15,6 +15,6 @@ with corresponding geometry pickled in
 ```  
 Files to read and reconstruct these are given in this repository (the easiest example is given by a FBP reconstruction in ```HelicalSkullCT_Reconstruction_FBP.py```).
 
-Note: Data with lower dosage is available upon request. All simulated data is given in /lcrnas/data/Simulated/120kV/raw/. DO NOT change the data in this repository. 
+Note: Data with lower dosage is available upon request. All simulated data is given in ```/lcrnas/data/Simulated/120kV/raw/```. **DO NOT change the data in this repository**. If unsure, ask. 
 
 
