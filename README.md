@@ -9,7 +9,7 @@ $ python -c "import adutils; adutils.load_data_from_nas('Z:\\')"
 ```
 where `'Z:\\'` should be replaced with your local path to the data drive of the NAS. This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions much faster. Note that it uses ~6GB of disk space in a subfolder to this project.
 
-Files to read and reconstruct the data is given in this repository (the easiest example is given by a FBP reconstruction in [`BP_reco_skullCT.py`](BP_reco_skullCT.py). Most of the data handling is however hidden in [`adutils.py`](adutils.py). To make use of these, simply run the following in your script
+Files to read and reconstruct the data is given in this repository (the easiest example is given by a FBP reconstruction in [`BP_reco_skullCT.py`](FBP_reco_skullCT.py). Most of the data handling is however hidden in [`adutils.py`](adutils.py). To make use of these, simply run the following in your script
 ```
 import adutils
 ```  
