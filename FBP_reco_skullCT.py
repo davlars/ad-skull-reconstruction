@@ -2,25 +2,25 @@
 FBP reconstruction example for simulated Skull CT data
 """
 
-import odl
 import numpy as np
-from adutils import *
+import adutils
 
 # Discretization
-discr_reco_space = get_discretization()
+reco_space = adutils.get_discretization()
 
 # Forward operator (in the form of a broadcast operator)
-A = get_ray_trafo()
+A = adutils.get_ray_trafo(reco_space)
 
 # Define fbp
-fbp = get_fbp(A)
+fbp = adutils.get_fbp(A)
 
 # Data
-rhs = get_data(A)
+rhs = adutils.get_data(A)
 
 # Reconstruct
 x = fbp(rhs)
 
 # Save
-saveName = '/lcrnas/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_FBP.npy'
-np.save(saveName,np.asarray(x))
+if False:
+    saveName = '/lcrnas/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_FBP.npy'
+    np.save(saveName, np.asarray(x))

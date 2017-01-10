@@ -14,7 +14,7 @@ def get_spectrum(n):
     dat = np.loadtxt(path+'spectrumGeriatrics.txt')
     energies = dat[:, 0] / 1000.0
     spectrum = dat[:, 1]
-    
+
     indices = np.linspace(0, energies.size - 1, n, dtype=int)
     energies = energies[indices]
     spectrum = spectrum[indices]
@@ -23,11 +23,11 @@ def get_spectrum(n):
 
 def getPhantom(phantomName):
 
-    #nifit data 
+    #nifit data
     path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
     nii = nib.load(path+phantomName)
     phantomdata = nii.get_data()
-                          
+
     densities = np.zeros_like(phantomdata, dtype=float)
     densities[phantomdata == 1] = 1.015   # fat
     densities[phantomdata == 2] = 1.8   # bone
@@ -42,9 +42,9 @@ def getPhantom(phantomName):
     mat[phantomdata == 2] = 2     # bone
     mat[phantomdata == 4] = 4     # white matter
     mat[phantomdata == 3] = 3     # grey matter
-    
+
     return densities, mat
-    
+
 energies, spectrum = get_spectrum(10)
 photons_per_pixel_one_run = 1000
 simNum = 120
@@ -54,17 +54,17 @@ numberOfPixels = 500*20
 numberOfTurns = 23
 numberOfProjections = 4000
 
-energyInPerProjection = photons_per_pixel* numberOfPixels * np.sum(energies*spectrum) 
+energyInPerProjection = photons_per_pixel* numberOfPixels * np.sum(energies*spectrum)
 
 energyHeadPerProjection = []
 for turn in range(numberOfTurns):
     print(turn)
-    file = ('/lcrnas/data//Simulated/120kV/raw/' +  
-           'helical_proj_70100644Phantom_labelled_no_bed_' + str(simNum) + 
-           '_Simulations_Turn_num_' + str(turn) + '.npy')
-    proj = np.load(file)
+    file_name = ('/lcrnas/data//Simulated/120kV/raw/' +
+                 'helical_proj_70100644Phantom_labelled_no_bed_' + str(simNum) +
+                 '_Simulations_Turn_num_' + str(turn) + '.npy')
+    proj = np.load(file_name)
     for projection in range(numberOfProjections):
-        energyHeadPerProjection.append(energyInPerProjection - 
+        energyHeadPerProjection.append(energyInPerProjection -
                                        np.sum(proj[projection,...]))
 
 MeV2J = 1.6021773e-13
