@@ -13,8 +13,10 @@ with corresponding geometry pickled in
 ```
   HelicalSkullCT_70100644Phantom_no_bed_Turn_{0,1,2,3,...,22}.geometry.p
 ```  
-Files to read and reconstruct these are given in this repository (the easiest example is given by a FBP reconstruction in ```HelicalSkullCT_Reconstruction_FBP.py```).
-
+Files to read and reconstruct these are given in this repository (the easiest example is given by a FBP reconstruction in ```HelicalSkullCT_Reconstruction_FBP.py```). Also, most of the data handling is hidden in ```adutils.py```. To make use of these, simply run the following in your script
+```
+  from adutils import *
+```  
 Note: Data with lower dosage is available upon request. All simulated data is given in ```/lcrnas/data/Simulated/120kV/raw/```. **DO NOT change the data in this repository**. If unsure, ask. 
 
 
