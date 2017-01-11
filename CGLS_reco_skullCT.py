@@ -26,12 +26,12 @@ callbackPrintIter = odl.solvers.CallbackPrintIteration()
 # Start with empty x
 x = reco_space.zero()
 
-# Run such that the solution is saved to local repo (saveReco == True), or not (saveReco == False)
+# Run such that the solution is saved to local repo (saveReco = True), or not (saveReco = False)
 saveReco = False
 
 niter = 100
 odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbackPrintIter)
 
 if saveReco:
-i   saveName = '/home/user/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations.npy'
+    saveName = '/home/user/data/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations.npy'
     np.save(saveName,np.asarray(x))
