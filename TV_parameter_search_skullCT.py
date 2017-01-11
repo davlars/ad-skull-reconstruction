@@ -72,29 +72,13 @@ for lamb in lambs:
     # Use the FBP as initial guess
     x = x_init
 
-    # Run such that every 5th iteration is saved (saveCont == 1) or only the last one (saveCont == 0)
-    saveCont = 1
+    # Run such that every 5th iteration is saved (saveReco = True) or none (saveReco = False)
+    saveReco = False
     savePath = '/home/user/Simulated/120kV/'
-
-    if saveCont == 0:
-        niter = 100
-        odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma = sigma,
-                                          niter = niter, gamma=gamma, callback=callbackPrintIter)
-        if False:
-            saveName = os.path.join(savePath,'reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_TV_lambda{}_'.format(lamb) +
-                                              str(niter) + 'iterations.npy')
-            np.save(saveName,np.asarray(x))
-
-    else:
-        startiter = 5
-        enditer = 101
-        stepiter = 5
-        niter = [int(i) for i in np.arange(startiter,enditer,stepiter)]
-        for iterations in niter:
-            odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma = sigma,
-                                              niter = stepiter, gamma=gamma, callback=callbackPrintIter)
-            if False:
-                saveNameStart = 'Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_TV_lambda{}_'.format(lamb)
-                savePath = os.path.join(savePath,'reco',saveNameStart)
-                saveName = (savePath + '{}iterations'.format(iterations) + '.npy')
-                np.save(saveName,np.asarray(x))
+    niter = 100
+    odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma = sigma,
+                                      niter = niter, gamma=gamma, callback=callbackPrintIter)
+    if saveReco:
+        saveName = os.path.join(savePath,'reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_TV_lambda{}_'.format(lamb) +
+                                          str(niter) + 'iterations.npy')
+        np.save(saveName,np.asarray(x))

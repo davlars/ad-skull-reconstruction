@@ -26,28 +26,13 @@ callbackPrintIter = odl.solvers.CallbackPrintIteration()
 # Start with empty x
 x = reco_space.zero()
 
-# Run such that every 5th iteration is saved (saveCont == True)
-# or only the last one (saveCont == False)
-saveCont = 0
+# Run such that recosntruction from last iterations is saved (saveReco =True), or not (saveReco = False)
+saveReco = False
 
 omega = 0.005
+niter = 100
+odl.solvers.landweber(A, x, rhs, niter=niter, omega=omega, callback = callbackPrintIter)
 
-if not saveCont:
-    niter = 5
-    odl.solvers.landweber(A, x, rhs, niter=niter, omega=omega, callback = callbackPrintIter)
-    if False:
-        saveName = '/home/user/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_' + str(niter) + 'iterations.npy'
-        np.save(saveName,np.asarray(x))
-else:
-    startiter = 5
-    enditer = 101
-    stepiter = 5
-    niter = [int(i) for i in np.arange(startiter,enditer,stepiter)]
-    saveNameStart = 'Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_'
-    savePath = os.path.join('/home/user/data/Simulated/120kV/','reco',saveNameStart)
-    for iterations in niter:
-        odl.solvers.landweber(A, x, rhs, niter=stepiter, omega=omega,
-                              callback=callbackPrintIter)
-        if False:
-            saveName = (savePath + '{}iterations'.format(iterations) + '.npy')
-            np.save(saveName,np.asarray(x))
+if saveReco:
+    saveName = '/home/user/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_Landweber_' + str(niter) + 'iterations.npy'
+    np.save(saveName,np.asarray(x))
