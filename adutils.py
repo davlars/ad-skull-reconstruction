@@ -263,4 +263,4 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
             Amygdala & HPC      - x[:,248,:]     
             """
     else:
-        print('Phantom not recognized. Has it really been simualted?')
+        print('Phantom not recognized. Has it really been simulated?')
