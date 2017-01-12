@@ -137,22 +137,22 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
         if not plot_separately:
             ax1 = plt.subplot(221)
             ax1.set_title('Coronary cut - anterior segment')
-            plt.imshow(np.flipud(np.transpose(x[:,400,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,400,:])), cmap=cmap) #257/400/164
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(222)
             ax1.set_title('Coronary cut - caudate')
-            plt.imshow(np.flipud(np.transpose(x[:,329,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,329,:])), cmap=cmap) #254/329/164
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(223)
             ax1.set_title('Coronary cut - HPC body')
-            plt.imshow(np.flipud(np.transpose(x[:,253,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,253,:])), cmap=cmap) #257/253/164
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(224)
             ax1.set_title('Coronary cut - HPC tail')
-            plt.imshow(np.flipud(np.transpose(x[:,234,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,234,:])), cmap=cmap) #257/234/164
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
         else:
@@ -175,30 +175,30 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
             
         if False: #Additional cuts
             """
-            Head of HPC         - x[:,272,:]
-            HPC, difficult part - x[:,295,:]
-            Caudate, difficult  - x[:,299,:]        
+            Head of HPC         - x[:,272,:]        #257/272/164
+            HPC, difficult part - x[:,295,:]        #205/295/119
+            Caudate, difficult  - x[:,299,:]        #257/299/164
             """
     elif phantomName[:8]  == '70114044':
         if not plot_separately:
             ax1 = plt.subplot(221)
             ax1.set_title('Coronary cut - anterior segment')
-            plt.imshow(np.flipud(np.transpose(x[:,489,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,489,:])), cmap=cmap) #237/489/169
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(222)
             ax1.set_title('Coronary cut - caudate')
-            plt.imshow(np.flipud(np.transpose(x[:,255,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,255,:])), cmap=cmap) #237/255/169
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(223)
             ax1.set_title('Coronary cut - HPC body')
-            plt.imshow(np.flipud(np.transpose(x[:,358,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,358,:])), cmap=cmap) #204/358/121
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(224)
             ax1.set_title('Coronary cut - Amygdala')
-            plt.imshow(np.flipud(np.transpose(x[:,305,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,305,:])), cmap=cmap) #308/305/120
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
         else:
@@ -222,22 +222,22 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
         if not plot_separately:
             ax1 = plt.subplot(221)
             ax1.set_title('Coronary cut - anterior segment')
-            plt.imshow(np.flipud(np.transpose(x[:,109,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,109,:])), cmap=cmap) #378/109/138
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(222)
             ax1.set_title('Coronary cut - caudate')
-            plt.imshow(np.flipud(np.transpose(x[:,188,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,188,:])), cmap=cmap) #411/188/138
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(223)
             ax1.set_title('Coronary cut - HPC body')
-            plt.imshow(np.flipud(np.transpose(x[:,285,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,285,:])), cmap=cmap) #384/285/138
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
             ax1 = plt.subplot(224)
             ax1.set_title('Coronary cut - HPC tail')
-            plt.imshow(np.flipud(np.transpose(x[:,296,:])), cmap=cmap)
+            plt.imshow(np.flipud(np.transpose(x[:,296,:])), cmap=cmap) #369/296/138
             ax1.axes.xaxis.set_visible(False)
             ax1.axes.yaxis.set_visible(False)
         else:
@@ -259,7 +259,7 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
             plt.axis('off')                        
         if False: #Additional cuts
             """
-            Amygdala & HPC      - x[:,248,:]     
+            Amygdala & HPC      - x[:,248,:]     #397/248/138
             """
     else:
         print('Phantom not recognized. Has it really been simulated?')
