@@ -123,7 +123,6 @@ def get_data(A, use_subset=False):
 def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii'):
     #nifit data 
     path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
-    path = '/media/davlars/usb/h70_10_subjects_Eric/Phantom/'
     nii = nib.load(path+phantomName)
     label = nii.get_data()
     label[label == 2] = 5 #Shift bone
