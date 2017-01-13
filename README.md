@@ -2,7 +2,7 @@
 Repository for reconstruction of simulated skull CT data for AD project with files for reconstruction simulated skull CT data (KTH/SSF AD project)
 
 ## Usage
-
+###### Load data to disc
 In order to use this repo, you first need to copy the data to your local machine. This can be done by:
 ```
 $ python -c "import adutils; adutils.load_data_from_nas('Z:\\')"
@@ -13,6 +13,25 @@ Files to read and reconstruct the data is given in this repository (the easiest 
 ```
 import adutils
 ```  
+###### Rebin data 
+To avoid heavy computations, a suggestion is to use downsampled rebinned data. To rebin data, run the following after you've downloaded data to your local drive:
+``` 
+adutils.rebin_data(rebin_factor)
+```
+with desired ``` (rebin_factor)``` (default is set to 10). Once you've done this, simply load your data using the rebin data flag, as per below:
+``` 
+rebin_factor = 10
+
+# Discretization
+reco_space = adutils.get_discretization()
+
+#Forward operator
+A = adutils.get_ray_trafo(reco_space, use_rebin=True, rebin_factor=rebin_factor)
+
+# Data
+rhs = adutils.get_data(A, use_rebin=True, rebin_factor=rebin_factor)
+```
+
 
 ## Raw data
 
