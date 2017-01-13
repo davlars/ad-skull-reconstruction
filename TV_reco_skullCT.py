@@ -13,9 +13,6 @@ reco_space = adutils.get_discretization()
 # Forward operator (in the form of a broadcast operator)
 A = adutils.get_ray_trafo(reco_space)
 
-# Define fbp in order to use it as initial guess for TV reco
-fbp = adutils.get_fbp(A)
-
 # Data
 rhs = adutils.get_data(A)
 
@@ -67,7 +64,7 @@ callbackShowReco = (odl.solvers.CallbackPrintIteration() &  # Print iterations
 callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
 # Use FBP as initial guess
-x = fbp(rhs)
+x = adutils.get_initial_guess(reco_space)
 
 # Run such that last iteration is saved (saveReco = 1) or none (saveReco = 0)
 saveReco = False

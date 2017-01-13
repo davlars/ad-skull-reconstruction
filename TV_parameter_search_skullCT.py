@@ -12,9 +12,6 @@ reco_space = adutils.get_discretization()
 # Forward operator (in the form of a broadcast operator)
 A = adutils.get_ray_trafo(reco_space)
 
-# Define fbp in order to use it as initial guess for TV reco
-fbp = adutils.get_fbp(A)
-
 # Data
 rhs = adutils.get_data(A)
 
@@ -37,7 +34,7 @@ print('Norm of the product space operator: {}'.format(op_norm))
 lambs = (0.01, 0.005, 0.003, 0.001, 0.0008, 0.0005, 0.0003, 0.0001)
 
 # Use FBP as initial guess
-x_init = fbp(rhs)
+x_init = adutils.get_initial_guess(reco_space)
 
 for lamb in lambs:
     # l2-squared data matching
@@ -70,7 +67,7 @@ for lamb in lambs:
     callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
     # Use the FBP as initial guess
-    x = x_init
+    x = x_init.copy()
 
     # Run such that every 5th iteration is saved (saveReco = True) or none (saveReco = False)
     saveReco = False
