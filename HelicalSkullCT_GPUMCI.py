@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Wed Oct 19 12:17:37 2016
-
-@author: davlars
+Example of how GPUMCI simulations have been performed. Given for completeness
 """
 
 from __future__ import division, print_function, unicode_literals, absolute_import
