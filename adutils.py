@@ -93,7 +93,7 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False, rebin_factor=10
 
 def get_fbp(A):
     fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(Ai,
-                                              padding=True,
+                                              padding=False,
                                               filter_type='Hamming', #Hann
                                               frequency_scaling=0.8) *
                                odl.tomo.tam_danielson_window(Ai))
@@ -135,7 +135,7 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii'):
     
     return label
 
-def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False):
+def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False, clim = (0.018, 0.022)):
     cmap = cm.Greys_r
     x = np.array(x)    
    
@@ -287,7 +287,7 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         sizeNew[0] /= rebin_factor
         projection_rebin = np.empty(sizeNew)
         for i in range(int(size[0])):
-            singleBin = np.mean(projections[i*10:(i+1)*10,:,:], axis = 0)
+            singleBin = np.mean(projections[i*rebin_factor:(i+1)*rebin_factor,:,:], axis = 0)
             projection_rebin[i,...] = singleBin
         saveName = os.path.join(data_path,(fileStart + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_'+str(rebin_factor) + '.data.npy'))
         np.save(saveName,projection_rebin)
@@ -309,7 +309,7 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
                                                     src_radius=geom.src_radius, 
                                                     det_radius=geom.det_radius,
                                                     pitch=geom.pitch,
-                                                    pitch_offset=-geom.pitch_offset)    
+                                                    pitch_offset=geom.pitch_offset)    
         
         pickle.dump(geom_rebin, open(os.path.join(data_path,(fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p')), 'wb+'))        
        
