@@ -89,7 +89,8 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
 
         if use_window:
             window = odl.tomo.tam_danielson_window(ray_trafo,
-                                                   smoothing_width=0.05)
+                                                   smoothing_width=0.05,
+                                                   n_half_rot=3)
             ray_trafo = window * ray_trafo
 
         Aops.append(ray_trafo)
@@ -105,7 +106,8 @@ def get_fbp(A):
                                               filter_type='Hamming', #Hann
                                               frequency_scaling=0.8) *
                                odl.tomo.tam_danielson_window(Ai,
-                                                             smoothing_width=0.1))
+                                                             smoothing_width=0.1,
+                                                             n_half_rot=3))
                               for Ai in A])
     return fbp
 
@@ -141,7 +143,8 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
 
         if use_window:
             window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
-                                                   smoothing_width=0.05)
+                                                   smoothing_width=0.05,
+                                                   n_half_rot=3)
             logdata *= window
 
         imagesTurn.append(logdata)
