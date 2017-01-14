@@ -33,7 +33,7 @@ print('Norm of the product space operator: {}'.format(op_norm))
 
 lambs = (0.01, 0.005, 0.003, 0.001, 0.0008, 0.0005, 0.0003, 0.0001)
 
-# Use FBP as initial guess
+# Use initial guess
 x_init = adutils.get_initial_guess(reco_space)
 
 for lamb in lambs:
