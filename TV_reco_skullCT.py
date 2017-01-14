@@ -63,7 +63,7 @@ callbackShowReco = (odl.solvers.CallbackPrintIteration() &  # Print iterations
 
 callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
-# Use FBP as initial guess
+# Use initial guess
 x = adutils.get_initial_guess(reco_space)
 
 # Run such that last iteration is saved (saveReco = 1) or none (saveReco = 0)
