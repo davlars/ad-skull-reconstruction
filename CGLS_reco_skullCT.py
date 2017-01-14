@@ -23,7 +23,7 @@ callbackShowReco = (odl.solvers.CallbackPrintIteration() &
 
 callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
-# Start with empty x
+# Start with initial guess
 x = adutils.get_initial_guess(reco_space)
 
 # Run such that the solution is saved to local repo (saveReco = True), or not (saveReco = False)
