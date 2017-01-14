@@ -161,11 +161,9 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii'):
     return label
 
 
-def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False, use_default_clim=False):
+def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False, clim = (0.018, 0.022)):
     cmap = cm.Greys_r
     x = np.array(x)
-    if not use_default_clim:
-        clim = (0.018, 0.022)
     
     if phantomName[:8] == '70100644':
         if not plot_separately:
