@@ -13,10 +13,11 @@ Files to read and reconstruct the data is given in this repository (the easiest 
 ```
 import adutils
 ```  
+
 ###### Rebin data 
 To avoid heavy computations, a suggestion is to use downsampled rebinned data. To rebin data, run the following after you've downloaded data to your local drive:
 ``` 
-adutils.rebin_data(rebin_factor)
+$ python -c "import adutils; adutils.rebin_data(10)"
 ```
 with desired ``` (rebin_factor)``` (default is set to 10). Once you've done this, simply load your data using the rebin data flag, as per below:
 ``` 
