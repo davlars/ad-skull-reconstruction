@@ -33,7 +33,7 @@ A = adutils.get_ray_trafo(reco_space, use_rebin=True, rebin_factor=rebin_factor)
 rhs = adutils.get_data(A, use_rebin=True, rebin_factor=rebin_factor)
 ```
 
-## Save data
+###### Save data
 To save data in a format that the clinical can review (typically [nifti](https://nifti.nimh.nih.gov/nifti-1)), use the ```adutils.save_data``` utility, with ```x``` being your reconstruction
 
 ```
