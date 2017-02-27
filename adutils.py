@@ -352,3 +352,17 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         ax = fig.add_subplot(111)
         ax.imshow(projectionsTot[:,:,10])
         ax.set_aspect('auto')
+
+def save_data(data, filename, as_nii=True, as_npy=True):
+    data = np.asarray(data)
+    if as_nii == True:
+        new_image = nib.Nifti1Image(data, affine=np.eye(4))
+        filename_nii = filename + '.nii'
+        nib.save(new_image, filename_nii)
+    if as_npy == True:
+        filename_npy = filename + 'npy'
+        np.save(filename, data)
+
+
+
+
