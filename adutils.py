@@ -41,13 +41,20 @@ def load_data_from_nas(nas_path):
         shutil.copy(filename, data_path)
 
 
-def get_discretization():
+def get_discretization(use_2D=False):
     # Set geometry for discretization
-    volumeSize = np.array([230.0, 230.0, 141.0546875])
-    volumeOrigin = np.array([-115.0, -115.0, 0])
+    if use_2D:
+        volumeSize = np.array([230.0, 230.0, 8.984375])
+        volumeOrigin = np.array([-115.0, -115.0, 6.6*11])
 
-    # Discretization parameters
-    nVoxels = np.array([512, 512, 314])
+        # Discretization parameters
+        nVoxels = np.array([512, 512, 20])
+    else:
+        volumeSize = np.array([230.0, 230.0, 141.0546875])
+        volumeOrigin = np.array([-115.0, -115.0, 0])
+    
+        # Discretization parameters
+        nVoxels = np.array([512, 512, 314])
 
     # Discrete reconstruction space
     reco_space = odl.uniform_discr(volumeOrigin,
@@ -57,58 +64,74 @@ def get_discretization():
 
 
 def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
-                  rebin_factor=10, use_window=False):
-    # Geometry and forward projector
-    if use_subset:
-        turns = range(13, 16)
-    else:
-        turns = range(nTurns)
-
-    Aops = []
-
-    if not os.path.exists(data_path):
-        raise IOError('Could not find files at {}, have you run '
-                      'adutils.load_data_from_nas()'.format(data_path))
-
-    for turn in turns:
-        print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
-        if use_rebin:
-            geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
-        else:
-            geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
-
-        # Load pickled geometry (small workaround of incompatibility between Python2/Python3 in pickle)
+                  rebin_factor=10, use_window=False, use_2D=False):
+    if use_2D:
+        print("Loading geometry")
+        geomFile = geomFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.geometry.p'))
+        
         with open(geomFile, 'rb') as f:
             if PY3:
                 geom = pickle.load(f, encoding='latin1')
             else:
                 geom = pickle.load(f)
-
-        # X-ray transform
-        ray_trafo = odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda')
-
-        if use_window:
-            window = odl.tomo.tam_danielson_window(ray_trafo,
-                                                   smoothing_width=0.05,
-                                                   n_half_rot=3)
-            ray_trafo = window * ray_trafo
-
-        Aops.append(ray_trafo)
-
-    A = odl.BroadcastOperator(*Aops)
+        
+        A = odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda')
+        
+    else:
+        # Geometry and forward projector
+        if use_subset:
+            turns = range(13, 16)
+        else:
+            turns = range(nTurns)
+    
+        Aops = []
+    
+        if not os.path.exists(data_path):
+            raise IOError('Could not find files at {}, have you run '
+                          'adutils.load_data_from_nas()'.format(data_path))
+    
+        for turn in turns:
+            print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
+            if use_rebin:
+                geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
+            else:
+                geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
+    
+            # Load pickled geometry (small workaround of incompatibility between Python2/Python3 in pickle)
+            with open(geomFile, 'rb') as f:
+                if PY3:
+                    geom = pickle.load(f, encoding='latin1')
+                else:
+                    geom = pickle.load(f)
+    
+            # X-ray transform
+            ray_trafo = odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda')
+    
+            if use_window:
+                window = odl.tomo.tam_danielson_window(ray_trafo,
+                                                       smoothing_width=0.05,
+                                                       n_half_rot=3)
+                ray_trafo = window * ray_trafo
+    
+            Aops.append(ray_trafo)
+    
+        A = odl.BroadcastOperator(*Aops)
 
     return A
 
 
-def get_fbp(A):
-    fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(Ai,
-                                              padding=False,
-                                              filter_type='Hamming', #Hann
-                                              frequency_scaling=0.8) *
-                               odl.tomo.tam_danielson_window(Ai,
-                                                             smoothing_width=0.1,
-                                                             n_half_rot=3))
-                              for Ai in A])
+def get_fbp(A, use_2D=False):
+    if use_2D:
+        fbp = odl.tomo.fbp_op(A,padding=False,filter_type='Hamming', frequency_scaling=0.8)
+    else:
+        fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(Ai,
+                                                  padding=False,
+                                                  filter_type='Hamming', #Hann
+                                                  frequency_scaling=0.8) *
+                                   odl.tomo.tam_danielson_window(Ai,
+                                                                 smoothing_width=0.1,
+                                                                 n_half_rot=3))
+                                  for Ai in A])
     return fbp
 
 
@@ -119,37 +142,46 @@ def get_initial_guess(space):
 
 
 def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
-             use_window=False):
-    # Data
-    if use_subset:
-        turns = range(13, 16)
-    else:
-        turns = range(nTurns)
-
-    if not os.path.exists(data_path):
-        raise IOError('Could not find files at {}, have you run '
-                      'adutils.load_data_from_nas()'.format(data_path))
-
-    imagesTurn = []
-    for turn in turns:
-        print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
-        if use_rebin:
-            dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.data.npy'))
-        else:
-            dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
+             use_window=False, use_2D=False):
+    if use_2D:
+        print("Loading data")
+        dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
-
-        logdata = -np.log(projections / 7910)
-
-        if use_window:
-            window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
-                                                   smoothing_width=0.05,
-                                                   n_half_rot=3)
-            logdata *= window
-
-        imagesTurn.append(logdata)
-
-    rhs = A.range.element(imagesTurn)
+        logdata = -np.log(projections / 8115)
+    
+        rhs = A.range.element(logdata)
+        
+    else:
+        # Data
+        if use_subset:
+            turns = range(13, 16)
+        else:
+            turns = range(nTurns)
+    
+        if not os.path.exists(data_path):
+            raise IOError('Could not find files at {}, have you run '
+                          'adutils.load_data_from_nas()'.format(data_path))
+    
+        imagesTurn = []
+        for turn in turns:
+            print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
+            if use_rebin:
+                dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.data.npy'))
+            else:
+                dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
+            projections = np.load(dataFile).astype('float32')
+    
+            logdata = -np.log(projections / 7910)
+    
+            if use_window:
+                window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
+                                                       smoothing_width=0.05,
+                                                       n_half_rot=3)
+                logdata *= window
+    
+            imagesTurn.append(logdata)
+    
+        rhs = A.range.element(imagesTurn)
 
     return rhs
 
