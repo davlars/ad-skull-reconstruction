@@ -21,9 +21,7 @@ rhs = adutils.get_data(A, use_2D=True)
 x = fbp(rhs)
 
 # Show result
-x.show(coords=[None, 0, None], clim=[0.010, 0.020])
-x.show(coords=[0, None, None], clim=[0.010, 0.020])
-x.show(coords=[None, None, 75], clim=[0.010, 0.020])
+x.show()
 
 # Save
 saveReco = False

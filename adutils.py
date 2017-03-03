@@ -44,11 +44,11 @@ def load_data_from_nas(nas_path):
 def get_discretization(use_2D=False):
     # Set geometry for discretization
     if use_2D:
-        volumeSize = np.array([230.0, 230.0, 8.984375])
-        volumeOrigin = np.array([-115.0, -115.0, 6.6*11])
+        volumeSize = np.array([230.0, 230.0])
+        volumeOrigin = np.array([-115.0, -115.0])
 
         # Discretization parameters
-        nVoxels = np.array([512, 512, 20])
+        nVoxels = np.array([512, 512])
     else:
         volumeSize = np.array([230.0, 230.0, 141.0546875])
         volumeOrigin = np.array([-115.0, -115.0, 0])
@@ -136,8 +136,11 @@ def get_fbp(A, use_2D=False):
 
 
 def get_initial_guess(space):
-    arr = np.load(os.path.join(data_path,
-                               'reference_reconstruction_{}_{}_{}.npy'.format(space.shape[0], space.shape[1], space.shape[2])))
+    if len(space.shape) == 2: #2D
+        arr = np.load(os.path.join(data_path,'reference_reconstruction_{}_{}.npy'.format(space.shape[0], space.shape[1])))
+    else:
+        arr = np.load(os.path.join(data_path,
+                                   'reference_reconstruction_{}_{}_{}.npy'.format(space.shape[0], space.shape[1], space.shape[2])))
     return space.element(arr)
 
 

@@ -21,14 +21,9 @@ lamb = 0.01
 
 
 callbackShowReco = (odl.solvers.CallbackPrintIteration() &
-                    odl.solvers.CallbackShow(coords=[None, 0, None]) &
-                    odl.solvers.CallbackShow(coords=[0, None, None]) &
-                    odl.solvers.CallbackShow(coords=[None, None, 75]))
+                    odl.solvers.CallbackShow(title))
 
-callbackPrintIter = (odl.solvers.CallbackPrintIteration() &
-            odl.solvers.CallbackShow(title, coords=[None, 0, None]) &
-            odl.solvers.CallbackShow(title, coords=[0, None, None]) &
-            odl.solvers.CallbackShow(title, coords=[None, None, 75]))
+callbackPrintIter = (odl.solvers.CallbackPrintIteration())
 
 # Start with initial guess
 x = adutils.get_initial_guess(reco_space)
@@ -38,7 +33,7 @@ x = adutils.get_initial_guess(reco_space)
 saveReco = False
 
 niter = 30
-odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbackPrintIter)
+odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbackShowReco)
 
 if saveReco:
     saveName = '/home/davlars/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations'
