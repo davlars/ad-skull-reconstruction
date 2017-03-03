@@ -41,6 +41,21 @@ fileName = /my/path/myFile
 adutils.save_data(x, fileName, as_nii=True, as_npy=True)
 ```
 
+###### 2D data set
+To be able to work with a smaller dataset (to e.g. try out different reconstruction parameters), a 2D fanbeam dataset has been generated, consiting of a mid transversal slice of the skull. To use this dataset, simply use the flag ```use_2D = True``` in the appropriate calls to ```adutils```. This means e.g.:
+``` 
+# Discretization
+reco_space = adutils.get_discretization(use_2D=True)
+
+#Forward operator
+A = adutils.get_ray_trafo(reco_space, use_2D=True)
+
+# Data
+rhs = adutils.get_data(A, use_2D=True)
+```
+Exampes of such is given for [FBP](https://github.com/davlars/ad-skull-reconstruction/blob/master/FBP_reco_skullCT_2D.py), [CGLS](https://github.com/davlars/ad-skull-reconstruction/blob/master/CGLS_reco_skullCT_2D.py), and [TV](https://github.com/davlars/ad-skull-reconstruction/blob/master/TV_reco_skullCT_2D.py).
+
+
 ## Raw data
 
 All simulated data is available on the lcrnas. For high dose (150 mGy) skullCT (following settings used at KI Geriatrics), data can be found in:
