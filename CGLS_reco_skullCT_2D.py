@@ -3,7 +3,6 @@ CGLS reconstruction example for simulated Skull CT data
 """
 import odl
 import numpy as np
-import os
 import adutils
 
 # Discretization
@@ -17,11 +16,9 @@ rhs = adutils.get_data(A, use_2D=True)
 
 # Reconstruct
 title = 'my reco'
-lamb = 0.01
-
 
 callbackShowReco = (odl.solvers.CallbackPrintIteration() &
-                    odl.solvers.CallbackShow(title))
+                    odl.solvers.CallbackShow(clim=[0.018, 0.022]))
 
 callbackPrintIter = (odl.solvers.CallbackPrintIteration())
 
@@ -33,7 +30,7 @@ x = adutils.get_initial_guess(reco_space)
 saveReco = False
 
 niter = 30
-odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbackShowReco)
+odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback=callbackShowReco)
 
 if saveReco:
     saveName = '/home/davlars/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations'
