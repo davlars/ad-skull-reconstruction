@@ -14,73 +14,77 @@ A = adutils.get_ray_trafo(reco_space, use_rebin=True)
 # Data
 rhs = adutils.get_data(A, use_rebin=True)
 
-# Create wavelet operator
-W = odl.trafos.WaveletTransform(reco_space, wavelet='haar', nlevels=5)
+# Use FBP as initial guess
+x_init = adutils.get_initial_guess(reco_space)
 
-# The wavelets bases are normalized to constant norm regardless of scale.
-# since we want to penalize "small" wavelets more than "large" ones, we need
-# to weight by the scale of the wavelets.
-# The "area" of the wavelets scales as 2 ^ scale, but we use a slightly smaller
-# number in order to allow some high frequencies.
-scales = W.scales()
+for wavelet in ['db1', 'db2']:
 
-for power in [2.2, 2.5, 2.8]:
-    WtrafoScaled = np.power(power, scales) * W
+    # Create wavelet operator
+    W = odl.trafos.WaveletTransform(reco_space, wavelet=wavelet, nlevels=5)
 
-    # Column vector of operators
-    op = odl.BroadcastOperator(A, WtrafoScaled)
+    # The wavelets bases are normalized to constant norm regardless of scale.
+    # since we want to penalize "small" wavelets more than "large" ones, we need
+    # to weight by the scale of the wavelets.
+    # The "area" of the wavelets scales as 3 ^ scale, but we use a slightly smaller
+    # number in order to allow some high frequencies.
+    scales = W.scales()
 
-    Anorm = odl.power_method_opnorm(A[1], maxiter=2)
-    Dnorm = odl.power_method_opnorm(WtrafoScaled,
-                                    xstart=odl.phantom.white_noise(W.domain),
-                                    maxiter=10)
+    for power in [2.0]:
+        WtrafoScaled = np.power(power, scales) * W
 
-    # Estimated operator norm, add 10 percent
-    op_norm = 1.1 * np.sqrt(len(A.operators)*(Anorm**2) + Dnorm**2)
+        # Column vector of operators
+        op = odl.BroadcastOperator(A, WtrafoScaled)
 
-    print('Norm of the product space operator: {}'.format(op_norm))
+        Anorm = odl.power_method_opnorm(A[1], maxiter=2)
+        Dnorm = odl.power_method_opnorm(WtrafoScaled,
+                                        xstart=odl.phantom.white_noise(W.domain),
+                                        maxiter=10)
 
-    lambs = (1e-7, 2e-7, 4e-7, 8e-7, 16e-7, 32e-7, 64e-7, 128e-7)
+        # Estimated operator norm, add 10 percent
+        op_norm = 1.1 * np.sqrt(len(A.operators)*(Anorm**2) + Dnorm**2)
 
-    # Use FBP as initial guess
-    x_init = adutils.get_initial_guess(reco_space)
+        print('Norm of the product space operator: {}'.format(op_norm))
 
-    for lamb in lambs:
-        print('Running power={}, lambda={}'.format(power, lamb))
+        lambs = (16e-7, 32e-7, 64e-7, 128e-7)
 
-        # l2-squared data matching
-        l2_norm = odl.solvers.L2NormSquared(A.range).translated(rhs)
+        for lamb in lambs:
+            print('Running wavelet={}, power={}, lambda={}'.format(wavelet, power, lamb))
 
-        # Isotropic TV-regularization i.e. the l1-norm
-        l1_norm = lamb * odl.solvers.L1Norm(W.range)
+            # l2-squared data matching
+            l2_norm = odl.solvers.L2NormSquared(A.range).translated(rhs)
 
-        # Combine functionals
-        f = odl.solvers.SeparableSum(l2_norm, l1_norm)
+            # Isotropic TV-regularization i.e. the l1-norm
+            l1_norm = lamb * odl.solvers.L1Norm(W.range)
 
-        # Set g functional to positivity constraint
-        g = odl.solvers.IndicatorNonnegativity(op.domain)
+            # Combine functionals
+            f = odl.solvers.SeparableSum(l2_norm, l1_norm)
 
-        # Acceleration parameter
-        gamma = 0.4
+            # Set g functional to positivity constraint
+            g = odl.solvers.IndicatorNonnegativity(op.domain)
 
-        # Step size for the proximal operator for the primal variable x
-        tau = 10.0 / op_norm
-        sigma = 1.0 / (op_norm ** 2 * tau)
+            # Acceleration parameter
+            gamma = 0.4
 
-        title = 'wavelet reco {}'.format(lamb)
+            # Step size for the proximal operator for the primal variable x
+            tau = 10.0 / op_norm
+            sigma = 1.0 / (op_norm ** 2 * tau)
 
-        pth = 'data/results/wavelet/power_{}_lambda_{}_{{:04d}}.png'.format(power, '{:8.8f}'.format(float(lamb)))
+            title = 'wavelet reco {}, {}, {}'.format(wavelet, power, lamb)
 
-        # Reconstruct
-        callback = (odl.solvers.CallbackPrintIteration() &
-                    odl.solvers.CallbackShow(title, coords=[None, 0, None], clim=[0.018, 0.022]) &
-                    odl.solvers.CallbackShow(title, coords=[0, None, None], clim=[0.018, 0.022]) &
-                    odl.solvers.CallbackShow(title, coords=[None, None, 60], clim=[0.018, 0.022],
-                                             saveto=pth))
+            pth = 'data/results/wavelet/wavelet_{}_power_{}_lambda_{}_{{:04d}}.png'.format(wavelet, power, '{:8.8f}'.format(float(lamb)))
+            save_pth = 'data/results/wavelet/result_wavelet_{}_power_{}_lambda_{}_{{:04d}}'.format(wavelet, power, '{:8.8f}'.format(float(lamb)))
 
-        # Use the FBP as initial guess
-        x = x_init.copy()
+            # Reconstruct
+            callback = (odl.solvers.CallbackPrintIteration() &
+                        odl.solvers.CallbackShow(title, coords=[None, 0, None], clim=[0.018, 0.022]) &
+                        odl.solvers.CallbackShow(title, coords=[0, None, None], clim=[0.018, 0.022]) &
+                        odl.solvers.CallbackShow(title, coords=[None, None, 60], clim=[0.018, 0.022],
+                                                 saveto=pth) &
+                        odl.solvers.CallbackSaveToDisk(save_pth, save_step=10, impl='numpy'))
 
-        niter = 200
-        odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma=sigma,
-                                          niter=niter, gamma=gamma, callback=callback)
+            # Use the FBP as initial guess
+            x = x_init.copy()
+
+            niter = 400
+            odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma=sigma,
+                                              niter=niter, gamma=gamma, callback=callback)

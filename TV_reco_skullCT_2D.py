@@ -32,7 +32,7 @@ op_norm = 1.1 * np.sqrt(Anorm**2 + Dnorm**2)
 
 print('Norm of the product space operator: {}'.format(op_norm))
 
-lamb = 0.005  # l2NormGrad/l1NormGrad = 0.01
+lamb = 0.001  # l2NormGrad/l1NormGrad = 0.01
 
 # l2-squared data matching
 l2_norm = odl.solvers.L2NormSquared(A.range).translated(rhs)
@@ -47,7 +47,7 @@ f = odl.solvers.SeparableSum(l2_norm, l1_norm)
 g = odl.solvers.ZeroFunctional(op.domain)
 
 # Accelerataion parameter
-gamma = 0.4
+gamma = 0.5
 
 # Step size for the proximal operator for the primal variable x
 tau = 1.0 / op_norm
@@ -57,7 +57,7 @@ sigma = 1.0 / op_norm  # 1.0 / (op_norm ** 2 * tau)
 
 # Reconstruct
 callbackShowReco = (odl.solvers.CallbackPrintIteration() &  # Print iterations
-                    odl.solvers.CallbackShow())
+                    odl.solvers.CallbackShow(clim=[0.018, 0.022]))
 
 callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
@@ -68,7 +68,7 @@ x = A.domain.zero()
 # Run such that last iteration is saved (saveReco = 1) or none (saveReco = 0)
 saveReco = False
 savePath = '/home/user/Simulated/120kV/'
-niter = 100
+niter = 400
 odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma = sigma,
 				  niter = niter, gamma=gamma, callback=callbackShowReco)
 if saveReco:
