@@ -67,7 +67,7 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
                   rebin_factor=10, use_window=False, use_2D=False):
     if use_2D:
         print("Loading geometry")
-        geomFile = geomFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.geometry.p'))
+        geomFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.geometry.p'))
         
         with open(geomFile, 'rb') as f:
             if PY3:
