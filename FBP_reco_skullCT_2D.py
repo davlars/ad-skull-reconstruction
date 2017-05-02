@@ -23,8 +23,13 @@ x = fbp(rhs)
 # Show result
 x.show()
 
+# Compare to phantom
+phantom = reco_space.element(adutils.get_phantom(use_2D=True))
+
+phantom.show()
+
 # Save
-saveReco = False
+saveReco = True
 if saveReco:
-    saveName = '/home/user/Simulated/120kV/reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_FBP_2D.npy'
+    saveName = '/home/davlars/reference_reconstruction_512_512.npy'
     np.save(saveName, np.asarray(x))

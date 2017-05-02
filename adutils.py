@@ -33,7 +33,7 @@ def load_data_from_nas(nas_path):
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
-    nas_data_path = os.path.join(nas_path, 'Simulated', '120kV')
+    nas_data_path = os.path.join(nas_path, 'Reference','CT','GPUMCI simulations','120kV')
     if not os.path.exists(nas_path):
         raise IOError('Cannot find NAS data at {}'.format(nas_data_path))
 
@@ -189,13 +189,16 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
     return rhs
 
 
-def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii'):
+def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False):
     #nifit data
-    path = '/lcrnas/data/Simulated/code/AD_GPUMCI/phantoms/'
+    path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
     nii = nib.load(path+phantomName)
     label = nii.get_data()
     label[label == 2] = 5 #Shift bone
 
+    if use_2D:
+        label = label[...,172]
+    
     return label
 
 
