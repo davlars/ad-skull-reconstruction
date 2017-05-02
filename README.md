@@ -41,6 +41,27 @@ fileName = /my/path/myFile
 adutils.save_data(x, fileName, as_nii=True, as_npy=True)
 ```
 
+###### Visualize data and compare to ground truth phantom
+To visualize data, simply call built-in odl functionalities like ```my_reconstruction.show()```, or alternatively use ```adutils.plot_data(reco)``` to get pre-defined cuts of clinical importance. 
+
+Also, using ```adutils.get_phantom``` the ground-truth phantom for the simulated data set can be retrieved. An example of such is given in the [2D-FBP](https://github.com/davlars/ad-skull-reconstruction/blob/master/FBP_reco_skullCT_2D.py), where the corresponding 2D-slice is loaded on the lines of:
+
+```
+# Compare to phantom
+phantom = reco_space.element(adutils.get_phantom(use_2D=True))
+
+phantom.show()
+```
+
+Alternatively, you can load the entire 3D dataset as a label map. Note that the phantom is labelled with tissue flags such that:
+```
+  0 - Air/Background
+  1 - CSF/Soft tissue
+  2 - Grey matter
+  3 - White matter
+  4 - Bone
+```
+
 ###### 2D data set
 To be able to work with a smaller dataset (to e.g. try out different reconstruction parameters), a 2D fanbeam dataset has been generated, consiting of a mid transversal slice of the skull. To use this dataset, simply use the flag ```use_2D = True``` in the appropriate calls to ```adutils```. This means e.g.:
 ``` 
