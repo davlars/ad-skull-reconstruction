@@ -195,7 +195,10 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False)
     nii = nib.load(path+phantomName)
     label = nii.get_data()
     label[label == 2] = 5 #Shift bone
-
+    label[label == 3] = 2 #Shift bone
+    label[label == 4] = 3 #Shift bone
+    label[label == 5] = 4 #Shift bone
+    
     if use_2D:
         label = label[...,172]
     
