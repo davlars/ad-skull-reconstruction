@@ -33,7 +33,7 @@ def load_data_from_nas(nas_path):
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
-    nas_data_path = os.path.join(nas_path, 'Reference','CT','GPUMCI simulations','120kV')
+    nas_data_path = os.path.join(nas_path, 'Users', 'dlarsson', 'Simulations', '120kV')
     if not os.path.exists(nas_path):
         raise IOError('Cannot find NAS data at {}'.format(nas_data_path))
 
