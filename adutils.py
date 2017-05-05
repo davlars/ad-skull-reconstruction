@@ -21,7 +21,7 @@ nTurns = 23
 PY3 = (sys.version_info > (3, 0))
 
 
-def load_data_from_nas(nas_path):
+def load_data_from_nas(nas_path, load_phantom=False):
     """Load all the needed data from the nas onto your local machine
 
     This makes loading files much faster.
@@ -39,7 +39,11 @@ def load_data_from_nas(nas_path):
 
     for filename in glob.glob(os.path.join(nas_data_path, '*.*')):
         shutil.copy(filename, data_path)
-
+    
+    if load_phantom == True:
+        nas_phantom_path = os.path.join(nas_path,'Reference','CT', 'GPUMCI simulations','code','AD_GPUMCI','phantoms')
+        for filename in glob.glob(os.path.join(nas_phantom_path, '*.*')):
+            shutil.copy(filename, data_path)
 
 def get_discretization(use_2D=False):
     # Set geometry for discretization
@@ -191,7 +195,8 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
 
 def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False):
     #nifit data
-    path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
+    #path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
+    path = os.path.join(data_path, phantomName)
     nii = nib.load(path+phantomName)
     label = nii.get_data()
     label[label == 2] = 5 #Shift bone
