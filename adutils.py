@@ -155,7 +155,7 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
         print("Loading data")
         dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
-        logdata = -np.log(projections / 8115)
+        logdata = -np.log(projections / np.max(projections))
     
         rhs = A.range.element(logdata)
         
@@ -179,7 +179,7 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
                 dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
             projections = np.load(dataFile).astype('float32')
     
-            logdata = -np.log(projections / 7910)
+            logdata = -np.log(projections / np.max(projections))
     
             if use_window:
                 window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
