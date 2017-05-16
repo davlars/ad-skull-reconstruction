@@ -179,7 +179,7 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
                 dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
             projections = np.load(dataFile).astype('float32')
     
-            logdata = -np.log(projections / np.max(projections))
+            logdata = -np.log(projections / 8120)
     
             if use_window:
                 window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
