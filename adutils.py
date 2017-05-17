@@ -127,10 +127,10 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
 
 def get_fbp(A, use_2D=False):
     if use_2D:
-        fbp = odl.tomo.fbp_op(A,padding=False,filter_type='Hamming', frequency_scaling=0.8)
+        fbp = odl.tomo.fbp_op(A,padding=True,filter_type='Hamming', frequency_scaling=0.8)
     else:
         fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(Ai,
-                                                  padding=False,
+                                                  padding=True,
                                                   filter_type='Hamming', #Hann
                                                   frequency_scaling=0.8) *
                                    odl.tomo.tam_danielson_window(Ai,
@@ -194,17 +194,26 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
     return rhs
 
 
-def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False):
+def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False, get_Flags=False):
     #nifit data
     #path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
     phantom = os.path.join(data_path, phantomName)
     nii = nib.load(phantom)
     label = nii.get_data()
-    label[label == 2] = 5 #Shift bone
-    label[label == 3] = 2 #Shift bone
-    label[label == 4] = 3 #Shift bone
+    label = np.asarray(label, dtype=np.float)
+    label = np.flipud(label) #Get correct orientation
+    label[label == 2] = 5 #Shiftbone
+    label[label == 3] = 2 #Shift grey matter
+    label[label == 4] = 3 #Shift white matter
     label[label == 5] = 4 #Shift bone
-    
+
+    if not get_Flags:
+        label[label == 0] = 0 #Mass attenuation air
+        label[label == 1] = 0.019696 #Mass attenuation csf (HU: 15)    
+        label[label == 2] = 0.020183 #Mass attenuation grey matter (HU: 40)   
+        label[label == 3] = 0.019884 #Mass attenuation white matter (HU: 25)    
+        label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)     
+
     if use_2D:
         label = label[...,172]
     

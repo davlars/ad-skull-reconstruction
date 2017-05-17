@@ -53,13 +53,21 @@ phantom = reco_space.element(adutils.get_phantom(use_2D=True))
 phantom.show()
 ```
 
-Alternatively, you can load the entire 3D dataset as a label map. Note that the phantom is labelled with tissue flags such that:
+Alternatively, you can load the entire 3D dataset as a label map. The phantom is given with attenuation values expected for the spectrum used for the simualted dataset (120kVp). Note that if wanted the phantom can be loaded as labelled with tissue flags such that:
 ```
   0 - Air/Background
   1 - CSF/Soft tissue
   2 - Grey matter
   3 - White matter
   4 - Bone
+```
+
+for that, call
+
+```
+phantom = reco_space.element(adutils.get_phantom(use_2D=True, get_Flags=True))
+
+phantom.show()
 ```
 
 ###### 2D data set
