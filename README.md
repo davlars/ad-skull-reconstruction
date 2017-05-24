@@ -2,25 +2,37 @@
 Repository for reconstruction of simulated skull CT data for AD project with files for reconstruction simulated skull CT data (KTH/SSF AD project)
 
 ## Usage
+
+###### Installation
+To close the repository, run
+```bash
+$ git clone https://github.com/davlars/ad-skull-reconstruction
+$ cd ad-skull-reconstruction
+```
+To install the required dependencies, run (in the root folder of this package)
+```bash
+$ pip install -r requirements.txt
+```
+
 ###### Load data to disc
 In order to use this repo, you first need to copy the data to your local machine. This can be done by:
+```bash
+$ python -c "import adutils; adutils.load_data_from_nas('Z:/')"
 ```
-$ python -c "import adutils; adutils.load_data_from_nas('Z:\\')"
-```
-where `'Z:\\'` should be replaced with your local path to the data drive of the NAS. This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions much faster. Note that it uses ~6GB of disk space in a subfolder to this project.
+where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions much faster. Note that it uses ~6GB of disk space in a sub-folder to this project.
 
 Files to read and reconstruct the data is given in this repository (the easiest example is given by a FBP reconstruction in [`FBP_reco_skullCT.py`](FBP_reco_skullCT.py). Most of the data handling is however hidden in [`adutils.py`](adutils.py). To make use of these, simply run the following in your script
-```
+```python
 import adutils
 ```  
 
 ###### Rebin data 
 To avoid heavy computations, a suggestion is to use downsampled rebinned data. To rebin data, run the following after you've downloaded data to your local drive:
-``` 
+```bash
 $ python -c "import adutils; adutils.rebin_data(10)"
 ```
 with desired ``` (rebin_factor)``` (default is set to 10). Once you've done this, simply load your data using the rebin data flag, as per below:
-``` 
+```python
 rebin_factor = 10
 
 # Discretization
@@ -36,7 +48,7 @@ rhs = adutils.get_data(A, use_rebin=True, rebin_factor=rebin_factor)
 ###### Save data
 To save data in a format that the clinical can review (typically [nifti](https://nifti.nimh.nih.gov/nifti-1)), use the ```adutils.save_data``` utility, with ```x``` being your reconstruction
 
-```
+```python
 fileName = /my/path/myFile
 adutils.save_data(x, fileName, as_nii=True, as_npy=True)
 ```
@@ -46,7 +58,7 @@ To visualize data, simply call built-in odl functionalities like ```my_reconstru
 
 Also, using ```adutils.get_phantom``` the ground-truth phantom for the simulated data set can be retrieved. An example of such is given in the [2D-FBP](https://github.com/davlars/ad-skull-reconstruction/blob/master/FBP_reco_skullCT_2D.py), where the corresponding 2D-slice is loaded on the lines of:
 
-```
+```python
 # Compare to phantom
 phantom = reco_space.element(adutils.get_phantom(use_2D=True))
 
@@ -64,7 +76,7 @@ Alternatively, you can load the entire 3D dataset as a label map. The phantom is
 
 for that, call
 
-```
+```python
 phantom = reco_space.element(adutils.get_phantom(use_2D=True, get_Flags=True))
 
 phantom.show()

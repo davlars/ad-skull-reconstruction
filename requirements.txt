@@ -1,0 +1,4 @@
+odl>=0.6.1
+nibabel
+tqdm
+matplotlib
