@@ -11,6 +11,7 @@ import glob
 import shutil
 import pickle
 import nibabel as nib
+import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -21,30 +22,36 @@ nTurns = 23
 PY3 = (sys.version_info > (3, 0))
 
 
-def load_data_from_nas(nas_path, load_data=True, load_phantom=False):
+def load_data_from_nas(nas_path, load_data=True, load_phantom=True):
     """Load all the needed data from the nas onto your local machine
 
     This makes loading files much faster.
 
-    Usage on windows where nas is bound to "Z:\"
+    Usage on windows where nas is bound to "Z:/"
 
-    python -c "import adutils; adutils.load_data_from_nas('Z:\\')"
+    python -c "import adutils; adutils.load_data_from_nas('Z:/')"
     """
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
-    nas_data_path = os.path.join(nas_path, 'Reference','CT','GPUMCI simulations','120kV')
-    if not os.path.exists(nas_path):
+    nas_data_path = os.path.join(nas_path, 'CT', 'GPUMCI simulations', '120kV')
+    if not os.path.exists(nas_data_path):
         raise IOError('Cannot find NAS data at {}'.format(nas_data_path))
 
-    if load_data == True:
-    	for filename in glob.glob(os.path.join(nas_data_path, '*.*')):
-    	    shutil.copy(filename, data_path)
-    
-    if load_phantom == True:
-        nas_phantom_path = os.path.join(nas_path,'Reference','CT', 'GPUMCI simulations','code','AD_GPUMCI','phantoms')
-        for filename in glob.glob(os.path.join(nas_phantom_path, '*.*')):
+    if load_data:
+        glb = glob.glob(os.path.join(nas_data_path, '*.*'))
+        for filename in tqdm.tqdm(glb, 'loading data'):
             shutil.copy(filename, data_path)
+
+    nas_phantom_path = os.path.join(nas_path, 'CT', 'GPUMCI simulations', 'code', 'AD_GPUMCI', 'phantoms')
+    if not os.path.exists(nas_phantom_path):
+        raise IOError('Cannot find NAS data at {}'.format(nas_phantom_path))
+
+    if load_phantom:
+        glb = glob.glob(os.path.join(nas_phantom_path, '*.*'))
+        for filename in tqdm.tqdm(glb, 'loading phantoms'):
+            shutil.copy(filename, data_path)
+
 
 def get_discretization(use_2D=False):
     # Set geometry for discretization
@@ -57,7 +64,7 @@ def get_discretization(use_2D=False):
     else:
         volumeSize = np.array([230.0, 230.0, 141.0546875])
         volumeOrigin = np.array([-115.0, -115.0, 0])
-    
+
         # Discretization parameters
         nVoxels = np.array([512, 512, 314])
 
@@ -73,53 +80,53 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
     if use_2D:
         print("Loading geometry")
         geomFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.geometry.p'))
-        
+
         with open(geomFile, 'rb') as f:
             if PY3:
                 geom = pickle.load(f, encoding='latin1')
             else:
                 geom = pickle.load(f)
-        
+
         A = odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda')
-        
+
     else:
         # Geometry and forward projector
         if use_subset:
             turns = range(13, 16)
         else:
             turns = range(nTurns)
-    
+
         Aops = []
-    
+
         if not os.path.exists(data_path):
             raise IOError('Could not find files at {}, have you run '
                           'adutils.load_data_from_nas()'.format(data_path))
-    
+
         for turn in turns:
             print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
             if use_rebin:
                 geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
             else:
                 geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
-    
+
             # Load pickled geometry (small workaround of incompatibility between Python2/Python3 in pickle)
             with open(geomFile, 'rb') as f:
                 if PY3:
                     geom = pickle.load(f, encoding='latin1')
                 else:
                     geom = pickle.load(f)
-    
+
             # X-ray transform
             ray_trafo = odl.tomo.RayTransform(reco_space, geom, impl='astra_cuda')
-    
+
             if use_window:
                 window = odl.tomo.tam_danielson_window(ray_trafo,
                                                        smoothing_width=0.05,
                                                        n_half_rot=3)
                 ray_trafo = window * ray_trafo
-    
+
             Aops.append(ray_trafo)
-    
+
         A = odl.BroadcastOperator(*Aops)
 
     return A
@@ -156,20 +163,20 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
         dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
         logdata = -np.log(projections / np.max(projections))
-    
+
         rhs = A.range.element(logdata)
-        
+
     else:
         # Data
         if use_subset:
             turns = range(13, 16)
         else:
             turns = range(nTurns)
-    
+
         if not os.path.exists(data_path):
             raise IOError('Could not find files at {}, have you run '
                           'adutils.load_data_from_nas()'.format(data_path))
-    
+
         imagesTurn = []
         for turn in turns:
             print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
@@ -178,17 +185,17 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
             else:
                 dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
             projections = np.load(dataFile).astype('float32')
-    
+
             logdata = -np.log(projections / 8120)
-    
+
             if use_window:
                 window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
                                                        smoothing_width=0.05,
                                                        n_half_rot=3)
                 logdata *= window
-    
+
             imagesTurn.append(logdata)
-    
+
         rhs = A.range.element(imagesTurn)
 
     return rhs
@@ -209,21 +216,21 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False,
 
     if not get_Flags:
         label[label == 0] = 0 #Mass attenuation air
-        label[label == 1] = 0.019696 #Mass attenuation csf (HU: 15)    
-        label[label == 2] = 0.020183 #Mass attenuation grey matter (HU: 40)   
-        label[label == 3] = 0.019884 #Mass attenuation white matter (HU: 25)    
-        label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)     
+        label[label == 1] = 0.019696 #Mass attenuation csf (HU: 15)
+        label[label == 2] = 0.020183 #Mass attenuation grey matter (HU: 40)
+        label[label == 3] = 0.019884 #Mass attenuation white matter (HU: 25)
+        label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)
 
     if use_2D:
         label = label[...,172]
-    
+
     return label
 
 
 def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False, clim = (0.018, 0.022)):
     cmap = cm.Greys_r
     x = np.array(x)
-    
+
     if phantomName[:8] == '70100644':
         if not plot_separately:
             ax1 = plt.subplot(221)
