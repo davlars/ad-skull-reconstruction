@@ -154,7 +154,7 @@ def reconstruction(proj_data, parameters):
 
     # Choose a starting point
     x0 = fbp.copy()
-    x1 = gradient(x0)
+    x1 = gradient.range.zero()
 
     x = op.domain.element([x0, x1])
 
@@ -169,7 +169,13 @@ initial_param = [1e-3, 1e-4]
 phantoms = [space.element(phantom)]
 datas = [data]
 
-fom = space.dist
+
+def fom(x1, x2):
+    result = space.dist(x1, x2)
+    print('FOM: {}'.format(result))
+    return result
+
+
 optimal_parameters = optimal_parameters(reconstruction,  fom,
                                         phantoms, datas,
                                         initial_param=initial_param)

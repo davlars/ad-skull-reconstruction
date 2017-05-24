@@ -222,7 +222,7 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False,
         label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)
 
     if use_2D:
-        label = label[...,172]
+        label = label[..., 172]
 
     return label
 
