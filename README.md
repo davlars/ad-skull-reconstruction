@@ -3,7 +3,7 @@ Repository for reconstruction of simulated skull CT data for AD project with fil
 
 ## Usage
 
-###### Installation
+### Installation
 To close the repository, run
 ```bash
 $ git clone https://github.com/davlars/ad-skull-reconstruction
@@ -14,7 +14,7 @@ To install the required dependencies, run (in the root folder of this package)
 $ pip install -r requirements.txt
 ```
 
-###### Load data to disc
+### Load data to disc
 In order to use this repo, you first need to copy the data to your local machine. This can be done by:
 ```bash
 $ python -c "import adutils; adutils.load_data_from_nas('Z:/')"
@@ -26,7 +26,7 @@ Files to read and reconstruct the data is given in this repository (the easiest 
 import adutils
 ```  
 
-###### Rebin data 
+### Rebin data 
 To avoid heavy computations, a suggestion is to use downsampled rebinned data. To rebin data, run the following after you've downloaded data to your local drive:
 ```bash
 $ python -c "import adutils; adutils.rebin_data(10)"
@@ -45,7 +45,7 @@ A = adutils.get_ray_trafo(reco_space, use_rebin=True, rebin_factor=rebin_factor)
 rhs = adutils.get_data(A, use_rebin=True, rebin_factor=rebin_factor)
 ```
 
-###### Save data
+### Save data
 To save data in a format that the clinical can review (typically [nifti](https://nifti.nimh.nih.gov/nifti-1)), use the ```adutils.save_data``` utility, with ```x``` being your reconstruction
 
 ```python
@@ -53,7 +53,7 @@ fileName = /my/path/myFile
 adutils.save_data(x, fileName, as_nii=True, as_npy=True)
 ```
 
-###### Visualize data and compare to ground truth phantom
+### Visualize data and compare to ground truth phantom
 To visualize data, simply call built-in odl functionalities like ```my_reconstruction.show()```, or alternatively use ```adutils.plot_data(reco)``` to get pre-defined cuts of clinical importance. 
 
 Also, using ```adutils.get_phantom``` the ground-truth phantom for the simulated data set can be retrieved. An example of such is given in the [2D-FBP](https://github.com/davlars/ad-skull-reconstruction/blob/master/FBP_reco_skullCT_2D.py), where the corresponding 2D-slice is loaded on the lines of:
@@ -82,7 +82,7 @@ phantom = reco_space.element(adutils.get_phantom(use_2D=True, get_Flags=True))
 phantom.show()
 ```
 
-###### 2D data set
+### 2D data set
 To be able to work with a smaller dataset (to e.g. try out different reconstruction parameters), a 2D fanbeam dataset has been generated, consiting of a mid transversal slice of the skull. To use this dataset, simply use the flag ```use_2D = True``` in the appropriate calls to ```adutils```. This means e.g.:
 ``` 
 # Discretization
