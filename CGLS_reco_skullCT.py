@@ -51,4 +51,4 @@ odl.solvers.conjugate_gradient_normal(A, x, rhs, niter=niter, callback = callbac
 
 if saveReco:
     saveName = '/home/davlars/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_CGLS_' + str(niter) + 'iterations'
-    adutils.save_data(x, saveName)
+    adutils.save_image(x, saveName)

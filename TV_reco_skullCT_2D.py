@@ -74,4 +74,4 @@ odl.solvers.chambolle_pock_solver(x, f, g, op, tau=tau, sigma = sigma,
 if saveReco:
     saveName = os.path.join(savePath,'reco/Reco_HelicalSkullCT_70100644Phantom_no_bed_Dose150mGy_TV_' +
                                           str(niter) + 'iterations.npy')
-    np.save(saveName,np.asarray(x))
+    adutils.save_image(x, saveName)

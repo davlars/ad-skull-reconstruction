@@ -416,7 +416,7 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         ax.imshow(projectionsTot[:,:,10])
         ax.set_aspect('auto')
 
-def save_data(data, filename, as_nii=True, as_npy=True):
+def save_image(data, filename, as_nii=True, as_npy=True):
     data = np.asarray(data)
     if as_nii == True:
         new_image = nib.Nifti1Image(data, affine=np.eye(4))
