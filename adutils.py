@@ -134,16 +134,22 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
 
 def get_fbp(A, use_2D=False):
     if use_2D:
-        fbp = odl.tomo.fbp_op(A,padding=True,filter_type='Hamming', frequency_scaling=0.8)
+        fbp = odl.tomo.fbp_op(A, padding=True, filter_type='Hamming',
+                              frequency_scaling=0.8)
     else:
-        fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(Ai,
-                                                  padding=True,
-                                                  filter_type='Hamming', #Hann
-                                                  frequency_scaling=0.8) *
-                                   odl.tomo.tam_danielson_window(Ai,
-                                                                 smoothing_width=0.1,
-                                                                 n_half_rot=3))
-                                  for Ai in A])
+        # This only works for A a BroadcastOperator, and as long as the
+        # Tam-Danielsson window is a vector/matrix and not an operator
+        if isinstance(A[0], odl.OperatorLeftVectorMult):
+            fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(
+                Ai.operator, padding=True, filter_type='Hamming',
+                frequency_scaling=0.8) * Ai.vector) for Ai in A])
+        else:
+            fbp = odl.ReductionOperator(*[(odl.tomo.fbp_op(
+                Ai, padding=True, filter_type='Hamming',  # Hann
+                frequency_scaling=0.8) *
+                odl.tomo.tam_danielson_window(Ai, smoothing_width=0.1,
+                                              n_half_rot=3))
+                for Ai in A])
     return fbp
 
 
