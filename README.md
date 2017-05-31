@@ -45,12 +45,12 @@ A = adutils.get_ray_trafo(reco_space, use_rebin=True, rebin_factor=rebin_factor)
 rhs = adutils.get_data(A, use_rebin=True, rebin_factor=rebin_factor)
 ```
 
-### Save data
-To save data in a format that the clinical can review (typically [nifti](https://nifti.nimh.nih.gov/nifti-1)), use the ```adutils.save_data``` utility, with ```x``` being your reconstruction
+### Save image
+To save data in a format that the clinical can review (typically [nifti](https://nifti.nimh.nih.gov/nifti-1)), use the ```adutils.save_image``` utility, with ```x``` being your reconstruction
 
 ```python
 fileName = /my/path/myFile
-adutils.save_data(x, fileName, as_nii=True, as_npy=True)
+adutils.save_image(x, fileName, as_nii=True, as_npy=True)
 ```
 
 ### Visualize data and compare to ground truth phantom
