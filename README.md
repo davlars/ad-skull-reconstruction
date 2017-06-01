@@ -5,13 +5,30 @@ Repository for reconstruction of simulated skull CT data for AD project with fil
 
 ### Installation
 To close the repository, run
+
 ```bash
 $ git clone https://github.com/davlars/ad-skull-reconstruction
 $ cd ad-skull-reconstruction
 ```
+
 To install the required dependencies, run (in the root folder of this package)
+
 ```bash
 $ pip install -r requirements.txt
+```
+
+Some dependencies are not currently available on pip and you'll get an error message if you do not have them installed.
+
+To install the latest version of ODL, run
+
+```bash
+$ pip install git+git://github.com/odlgroup/odl
+```
+
+To install astra, run
+
+```
+$ conda install -c astra-toolbox astra-toolbox
 ```
 
 ### Load data to disc
