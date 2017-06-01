@@ -19,7 +19,10 @@ In order to use this repo, you first need to copy the data to your local machine
 ```bash
 $ python -c "import adutils; adutils.load_data_from_nas('Z:/')"
 ```
-where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows, or '/path/to/nas/Reference/' on linux). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions much faster. Note that it uses ~6GB of disk space in a sub-folder to this project.
+where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows, or '/path/to/nas/Reference/' on linux). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions 
+much faster. Note that it uses ~6GB of disk space in a sub-folder to this project.
+
+For linux users, instructions on how to properly mount the nas cand be found  [here](https://davlars.github.io/how_to_mount_imagingnas.github.io/)
 
 Files to read and reconstruct the data is given in this repository (the easiest example is given by a FBP reconstruction in [`FBP_reco_skullCT.py`](FBP_reco_skullCT.py). Most of the data handling is however hidden in [`adutils.py`](adutils.py). To make use of these, simply run the following in your script
 ```python
