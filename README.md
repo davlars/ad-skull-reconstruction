@@ -19,7 +19,7 @@ In order to use this repo, you first need to copy the data to your local machine
 ```bash
 $ python -c "import adutils; adutils.load_data_from_nas('Z:/')"
 ```
-where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows, or '/path/to/nas/Reference/' on linux). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions 
+where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows, or '/mnt/imagingnas/Reference/' on linux). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions 
 much faster. Note that it uses ~6GB of disk space in a sub-folder to this project.
 
 For linux users, instructions on how to properly mount the nas cand be found  [here](https://davlars.github.io/how_to_mount_imagingnas.github.io/)
