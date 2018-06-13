@@ -29,7 +29,7 @@ phantom = reco_space.element(adutils.get_phantom(use_2D=True))
 phantom.show()
 
 # Save
-saveReco = True
+saveReco = False
 if saveReco:
-    saveName = '/home/davlars/reference_reconstruction_512_512.npy'
+    saveName = '/home/user/reference_reconstruction_512_512.npy'
     np.save(saveName, np.asarray(x))

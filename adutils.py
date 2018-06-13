@@ -48,7 +48,7 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True):
         raise IOError('Cannot find NAS data at {}'.format(nas_phantom_path))
 
     if load_phantom:
-        glb = glob.glob(os.path.join(nas_phantom_path, '*.*'))
+        glb = glob.glob(os.path.join(nas_phantom_path, '*_no_bed*.*'))
         for filename in tqdm.tqdm(glb, 'loading phantoms'):
             shutil.copy(filename, data_path)
 
@@ -165,11 +165,18 @@ def get_initial_guess(space):
 
 
 def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
-             use_window=False, use_2D=False):
+             use_window=False, use_2D=False, flip_data=False):
     if use_2D:
         print("Loading data")
         dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
+        
+        if flip_data:
+        # Flip first component of detector due to ODL-fix #1245. Only if using old input data
+            projections = projections[:, ::-1]
+            # print("Saving file")
+            # np.save(dataFile, projections)
+        
         logdata = -np.log(projections / np.max(projections))
 
         rhs = A.range.element(logdata)
@@ -194,8 +201,15 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
                 dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
             projections = np.load(dataFile).astype('float32')
 
-            logdata = -np.log(projections / 8120)
+            if flip_data:
+            # Flip first component of detector due to ODL-fix #1245. Only if using old input data
+                projections = projections[:, ::-1, :]
+                # print("Saving file")
+                # np.save(dataFile, projections)
 
+            logdata = -np.log(projections / 8120)
+            
+            
             if use_window:
                 window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
                                                        smoothing_width=0.05,
@@ -217,6 +231,7 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False,
     label = nii.get_data()
     label = np.asarray(label, dtype=np.float)
     label = np.flipud(label) #Get correct orientation
+    label = np.rot90(label) #Get correct orientation
     label[label == 2] = 5 #Shiftbone
     label[label == 3] = 2 #Shift grey matter
     label[label == 4] = 3 #Shift white matter
@@ -410,12 +425,19 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         angle_partition = odl.uniform_partition(2 * np.pi * turn,
                                                 2 * np.pi * (turn + 1),
                                                 nProjection)
-        geom_rebin = odl.tomo.HelicalConeFlatGeometry(angle_partition,
-                                                    geom.det_partition,
-                                                    src_radius=geom.src_radius,
-                                                    det_radius=geom.det_radius,
-                                                    pitch=geom.pitch,
-                                                    pitch_offset=geom.pitch_offset)
+#        geom_rebin = odl.tomo.HelicalConeFlatGeometry(angle_partition,
+#                                                    geom.det_partition,
+#                                                    src_radius=geom.src_radius,
+#                                                    det_radius=geom.det_radius,
+#                                                    pitch=geom.pitch,
+#                                                    pitch_offset=geom.pitch_offset)
+        
+        geom_rebin = odl.tomo.ConeFlatGeometry(angle_partition,
+                                               geom.det_partition,
+                                               src_radius=geom.src_radius,
+                                               det_radius=geom.det_radius,
+                                               pitch=geom.pitch,
+                                               offset_along_axis=geom.offset_along_axis)
 
         pickle.dump(geom_rebin, open(os.path.join(data_path,(fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p')), 'wb+'))
 
