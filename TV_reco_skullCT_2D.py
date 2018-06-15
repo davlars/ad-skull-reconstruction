@@ -1,5 +1,7 @@
 """
-TV reconstruction example for simulated Skull CT data
+TV reconstruction example for simulated Skull CT data - 2D
+
+Note: So far only works for phantom_number = '70100644'
 """
 
 import odl

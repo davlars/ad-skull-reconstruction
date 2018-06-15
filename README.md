@@ -39,6 +39,11 @@ $ python -c "import adutils; adutils.load_data_from_nas('Z:/')"
 where `'Z:/'` should be replaced with your local path to the "REFERENCE" data drive of the NAS (i.e 'Z:/' on windows, or '/mnt/imagingnas/Reference/' on linux). This takes quite some time (~10 minutes) to run at first, but makes subsequent reconstructions 
 much faster. Note that it uses ~6GB of disk space in a sub-folder to this project.
 
+Note that the above autaomtically loads only one of the simulated phantoms (`70100644`). If you want to load any of the othe ones, specify this with a `phantom_number` argument like:
+```bash
+$ python -c "import adutils; adutils.load_data_from_nas('Z:/',phantom_number='70162244')"
+```
+
 For linux users, instructions on how to properly mount the nas cand be found  [here](https://davlars.github.io/how_to_mount_imagingnas.github.io/)
 
 Files to read and reconstruct the data is given in this repository (the easiest example is given by a FBP reconstruction in [`FBP_reco_skullCT.py`](FBP_reco_skullCT.py). Most of the data handling is however hidden in [`adutils.py`](adutils.py). To make use of these, simply run the following in your script
@@ -116,6 +121,7 @@ rhs = adutils.get_data(A, use_2D=True)
 ```
 Exampes of such is given for [FBP](https://github.com/davlars/ad-skull-reconstruction/blob/master/FBP_reco_skullCT_2D.py), [CGLS](https://github.com/davlars/ad-skull-reconstruction/blob/master/CGLS_reco_skullCT_2D.py), and [TV](https://github.com/davlars/ad-skull-reconstruction/blob/master/TV_reco_skullCT_2D.py).
 
+Note: A 2D dataset only exists for `phantom_number='70100644`. If wanting to do quick tests on any of the other datasets, simply use `use_rebin` or `use_subset`. 
 
 ## Raw data
 

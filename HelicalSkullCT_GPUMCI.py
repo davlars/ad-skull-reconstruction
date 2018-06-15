@@ -111,12 +111,12 @@ def calculate_projections(phantomName, saveName, turnNumber):
     detector_partition = odl.uniform_partition(detectorOrigin, detectorOrigin+detectorSize, nPixels)
     
     # Spiral has a pitch of pitch_mm, we run n_turns rounds (due to max angle = 8 * 2 * pi)
-    geometry = odl.tomo.HelicalConeFlatGeometry(angle_partition, 
-                                                detector_partition, 
-                                                src_radius=sourceAxisDistance, 
-                                                det_radius=detectorAxisDistance,
-                                                pitch=pitch_mm,
-                                                pitch_offset=-2)
+    geometry = odl.tomo.ConeFlatGeometry(angle_partition, 
+                                         detector_partition, 
+                                         src_radius=sourceAxisDistance, 
+                                         det_radius=detectorAxisDistance,
+                                         pitch=pitch_mm,
+                                         offset_along_axis=-2)
     
     energies, spectrum = get_spectrum(20)
     photons_per_pixel = 2000

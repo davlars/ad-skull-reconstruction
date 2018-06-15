@@ -5,17 +5,34 @@ import odl
 import numpy as np
 import adutils
 
+# Define phantom name (or use default '70100644')
+phantom_number = '70100644'
+
+# Rebin data
+rebin_factor = 10
+adutils.rebin_data(rebin_factor, 
+                   phantom_number=phantom_number)
+
 # Discretization
-reco_space = adutils.get_discretization()
+reco_space = adutils.get_discretization(phantom_number=phantom_number)
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space, use_rebin=True)
+A = adutils.get_ray_trafo(reco_space, 
+                          use_rebin=True, 
+                          rebin_factor=rebin_factor,
+                          phantom_number=phantom_number)
 
 # Data
-rhs = adutils.get_data(A, use_rebin=True)
+rhs = adutils.get_data(A, 
+                       use_rebin=True, 
+                       rebin_factor=rebin_factor,
+                       phantom_number=phantom_number)
 
-# Use FBP as initial guess
-x_init = adutils.get_initial_guess(reco_space)
+# Start with initial FBP guess, so far only for '70100644'
+if phantom_number == '70100644':
+    x = adutils.get_initial_guess(reco_space)
+else:
+    x = x = reco_space.zero()
 
 for wavelet in ['db1', 'db2']:
 

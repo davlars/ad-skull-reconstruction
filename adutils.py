@@ -14,15 +14,19 @@ import nibabel as nib
 import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import adutils
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(dir_path, 'data', 'Simulated', '120kV')
-fileStart = 'HelicalSkullCT_70100644Phantom_no_bed_'
+
+#Default pahntom_number
+phantom_number = '70100644'
+
 nTurns = 23
 PY3 = (sys.version_info > (3, 0))
 
 
-def load_data_from_nas(nas_path, load_data=True, load_phantom=True):
+def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_number=phantom_number):
     """Load all the needed data from the nas onto your local machine
 
     This makes loading files much faster.
@@ -31,10 +35,12 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True):
 
     python -c "import adutils; adutils.load_data_from_nas('Z:/')"
     """
+    phantom_name = phantom_number + 'Phantom_labelled'
+    
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
-    nas_data_path = os.path.join(nas_path, 'CT', 'GPUMCI simulations', '120kV')
+    nas_data_path = os.path.join(nas_path, 'CT', 'GPUMCI simulations', '120kV', phantom_name)
     if not os.path.exists(nas_data_path):
         raise IOError('Cannot find NAS data at {}'.format(nas_data_path))
 
@@ -53,20 +59,37 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True):
             shutil.copy(filename, data_path)
 
 
-def get_discretization(use_2D=False):
+def get_discretization(phantom_number = phantom_number, use_2D=False):    
     # Set geometry for discretization
+    pixelSize = 0.44921875
+    phantomShape = adutils.get_phantom(phantom_number=phantom_number, use_2D=use_2D).shape
     if use_2D:
-        volumeSize = np.array([230.0, 230.0])
-        volumeOrigin = np.array([-115.0, -115.0])
+        volumeSize = np.array([np.round(phantomShape[0]*pixelSize), 
+                               np.round(phantomShape[1]*pixelSize)])
+        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2, 
+                                  -np.round(phantomShape[1]*pixelSize)/2])
+        #volumeSize = np.array([230.0, 230.0])
+        #volumeOrigin = np.array([-115.0, -115.0])
 
         # Discretization parameters
-        nVoxels = np.array([512, 512])
+        nVoxels = np.array([phantomShape[0],
+                            phantomShape[1]])
+        #nVoxels = np.array([512, 512])
     else:
-        volumeSize = np.array([230.0, 230.0, 141.0546875])
-        volumeOrigin = np.array([-115.0, -115.0, 0])
+        volumeSize = np.array([np.round(phantomShape[0]*pixelSize), 
+                               np.round(phantomShape[1]*pixelSize),
+                               np.round(phantomShape[2]*pixelSize)])
+        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2, 
+                                  -np.round(phantomShape[1]*pixelSize)/2,
+                                  0])
+        #volumeSize = np.array([230.0, 230.0, 141.0546875])
+        #volumeOrigin = np.array([-115.0, -115.0, 0])
 
         # Discretization parameters
-        nVoxels = np.array([512, 512, 314])
+        nVoxels = np.array([phantomShape[0],
+                            phantomShape[1],
+                            phantomShape[2]])
+        #nVoxels = np.array([512, 512, 314])
 
     # Discrete reconstruction space
     reco_space = odl.uniform_discr(volumeOrigin,
@@ -75,11 +98,19 @@ def get_discretization(use_2D=False):
     return reco_space
 
 
-def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
-                  rebin_factor=10, use_window=False, use_2D=False):
+def get_ray_trafo(reco_space, 
+                  use_subset=False, 
+                  use_rebin=False,
+                  rebin_factor=10, 
+                  use_window=False, 
+                  use_2D=False,
+                  phantom_number=phantom_number):
+    
+    file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'
+    
     if use_2D:
         print("Loading geometry")
-        geomFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.geometry.p'))
+        geomFile = os.path.join(data_path, (file_start + 'Dose150mGy_2D.geometry.p'))
 
         with open(geomFile, 'rb') as f:
             if PY3:
@@ -105,9 +136,9 @@ def get_ray_trafo(reco_space, use_subset=False, use_rebin=False,
         for turn in turns:
             print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
             if use_rebin:
-                geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
+                geomFile = os.path.join(data_path, (file_start + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
             else:
-                geomFile = os.path.join(data_path, (fileStart + 'Turn_' + str(turn) + '.geometry.p'))
+                geomFile = os.path.join(data_path, (file_start + 'Turn_' + str(turn) + '.geometry.p'))
 
             # Load pickled geometry (small workaround of incompatibility between Python2/Python3 in pickle)
             with open(geomFile, 'rb') as f:
@@ -156,6 +187,10 @@ def get_fbp(A, use_2D=False):
 
 
 def get_initial_guess(space):
+    """Get initial FBP guess for more refined reconstruction techniques. 
+
+    Note: so far this only works with the 70100644Phantom_labelled_no_bed.nii-phantom
+    """
     if len(space.shape) == 2: #2D
         arr = np.load(os.path.join(data_path,'reference_reconstruction_{}_{}.npy'.format(space.shape[0], space.shape[1])))
     else:
@@ -164,18 +199,26 @@ def get_initial_guess(space):
     return space.element(arr)
 
 
-def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
-             use_window=False, use_2D=False, flip_data=False):
+def get_data(A, use_subset=False, 
+             use_rebin=False, 
+             rebin_factor=10,
+             use_window=False, 
+             use_2D=False, 
+             flip_data=False,
+             phantom_number=phantom_number):
+    
+    file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'
+
     if use_2D:
         print("Loading data")
-        dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_2D.data.npy'))
+        dataFile = os.path.join(data_path, (file_start + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
         
         if flip_data:
         # Flip first component of detector due to ODL-fix #1245. Only if using old input data
             projections = projections[:, ::-1]
-            # print("Saving file")
-            # np.save(dataFile, projections)
+            #print("Saving file")
+            #np.save(dataFile, projections)
         
         logdata = -np.log(projections / np.max(projections))
 
@@ -196,16 +239,16 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
         for turn in turns:
             print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
             if use_rebin:
-                dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.data.npy'))
+                dataFile = os.path.join(data_path, (file_start + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.data.npy'))
             else:
-                dataFile = os.path.join(data_path, (fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
+                dataFile = os.path.join(data_path, (file_start + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
             projections = np.load(dataFile).astype('float32')
 
             if flip_data:
             # Flip first component of detector due to ODL-fix #1245. Only if using old input data
                 projections = projections[:, ::-1, :]
-                # print("Saving file")
-                # np.save(dataFile, projections)
+                #print("Saving file")
+                #np.save(dataFile, projections)
 
             logdata = -np.log(projections / 8120)
             
@@ -223,10 +266,11 @@ def get_data(A, use_subset=False, use_rebin=False, rebin_factor=10,
     return rhs
 
 
-def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False, get_Flags=False):
+def get_phantom(phantom_number = phantom_number, use_2D = False, get_Flags = False):
+    phantom_name = phantom_number + 'Phantom_labelled_no_bed.nii'
     #nifit data
     #path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
-    phantom = os.path.join(data_path, phantomName)
+    phantom = os.path.join(data_path, phantom_name)
     nii = nib.load(phantom)
     label = nii.get_data()
     label = np.asarray(label, dtype=np.float)
@@ -250,7 +294,10 @@ def get_phantom(phantomName='70100644Phantom_labelled_no_bed.nii', use_2D=False,
     return label
 
 
-def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=False, clim = (0.018, 0.022)):
+def plot_data(x, phantom_number=phantom_number, plot_separately=False, clim = (0.018, 0.022)):
+    
+    phantom_name = phantom_number + 'Phantom_no_bed.nii'
+       
     cmap = cm.Greys_r
     x = np.array(x)
 
@@ -260,7 +307,7 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
         plt.imshow(np.flipud(np.transpose(x)), cmap=cmap, clim = clim)
         plt.axis('off')
     else:
-        if phantomName[:8] == '70100644':
+        if phantom_name[:8] == '70100644':
             if not plot_separately:
                 ax1 = plt.subplot(221)
                 ax1.set_title('Coronary cut - anterior segment')
@@ -306,7 +353,7 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
                 HPC, difficult part - x[:,295,:]        #205/295/119
                 Caudate, difficult  - x[:,299,:]        #257/299/164
                 """
-        elif phantomName[:8]  == '70114044':
+        elif phantom_name[:8]  == '70114044':
             if not plot_separately:
                 ax1 = plt.subplot(221)
                 ax1.set_title('Coronary cut - anterior segment')
@@ -345,7 +392,7 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
                 plt.title('Coronary cut - Amygdala')
                 plt.imshow(np.flipud(np.transpose(x[:,305,:])), cmap=cmap, clim = clim)
                 plt.axis('off')
-        elif phantomName[:8] == '70122044':
+        elif phantom_name[:8] == '70122044':
             if not plot_separately:
                 ax1 = plt.subplot(221)
                 ax1.set_title('Coronary cut - anterior segment')
@@ -391,8 +438,10 @@ def plot_data(x, phantomName='70100644Phantom_xled_no_bed.nii', plot_separately=
         else:
             print('Phantom not recognized. Has it really been simulated?')
 
-def rebin_data(rebin_factor=10, plot_rebin=False):
+def rebin_data(rebin_factor=10, phantom_number=phantom_number, plot_rebin=False):
 
+    file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'    
+   
     if 4000 % rebin_factor:
         raise IOError('Cannot rebin data %i projections with rebin factor %i' %(4000,rebin_factor))
 
@@ -400,7 +449,7 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         raise IOError('Could not find files at {}, have you run '
                       'adutils.load_data_from_nas()'.format(data_path))
     for turn in range(23):
-        myFile = os.path.join(data_path,(fileStart + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
+        myFile = os.path.join(data_path,(file_start + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
         print("Rebinning data for turn number {} out of {}".format(turn + 1, nTurns))
         projections = np.load(myFile)
         size = np.array(np.shape(projections))
@@ -410,11 +459,11 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
         for i in range(int(size[0])):
             singleBin = np.mean(projections[i*rebin_factor:(i+1)*rebin_factor,:,:], axis = 0)
             projection_rebin[i,...] = singleBin
-        saveName = os.path.join(data_path,(fileStart + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_'+str(rebin_factor) + '.data.npy'))
+        saveName = os.path.join(data_path,(file_start + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_'+str(rebin_factor) + '.data.npy'))
         np.save(saveName,projection_rebin)
 
         print("Rebinning geometry for turn number {} out of {}".format(turn + 1, nTurns))
-        geomFile = os.path.join(data_path,(fileStart + 'Turn_' + str(turn) + '.geometry.p'))
+        geomFile = os.path.join(data_path,(file_start + 'Turn_' + str(turn) + '.geometry.p'))
         with open(geomFile, 'rb') as f:
             if PY3:
                 geom = pickle.load(f, encoding='latin1')
@@ -439,7 +488,7 @@ def rebin_data(rebin_factor=10, plot_rebin=False):
                                                pitch=geom.pitch,
                                                offset_along_axis=geom.offset_along_axis)
 
-        pickle.dump(geom_rebin, open(os.path.join(data_path,(fileStart + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p')), 'wb+'))
+        pickle.dump(geom_rebin, open(os.path.join(data_path,(file_start + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p')), 'wb+'))
 
         if turn == 0:
             projectionsTot = projection_rebin

@@ -1,5 +1,7 @@
 """
 CGLS reconstruction example for simulated Skull CT data
+
+Note: So far only works for phantom_number = '70100644'
 """
 import odl
 import numpy as np

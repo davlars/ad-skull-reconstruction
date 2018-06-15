@@ -6,14 +6,19 @@ import numpy as np
 import os
 import adutils
 
+# Define phantom name (or use default '70100644')
+phantom_number = '70100644'
+
 # Discretization
-reco_space = adutils.get_discretization()
+reco_space = adutils.get_discretization(phantom_number=phantom_number)
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space)
+A = adutils.get_ray_trafo(reco_space,
+                          phantom_number=phantom_number)
 
 # Data
-rhs = adutils.get_data(A)
+rhs = adutils.get_data(A,
+                       phantom_number=phantom_number)
 
 # Gradient operator
 gradient = odl.Gradient(reco_space, method='forward')
@@ -33,8 +38,11 @@ print('Norm of the product space operator: {}'.format(op_norm))
 
 lambs = (0.01, 0.005, 0.003, 0.001, 0.0008, 0.0005, 0.0003, 0.0001)
 
-# Use initial guess
-x_init = adutils.get_initial_guess(reco_space)
+# Start with initial guess, so far only for '70100644'
+if phantom_number == '70100644':
+    x = adutils.get_initial_guess(reco_space)
+else:
+    x = x = reco_space.zero()
 
 for lamb in lambs:
     # l2-squared data matching

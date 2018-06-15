@@ -1,5 +1,7 @@
 """
-FBP reconstruction example for simulated Skull CT data
+FBP reconstruction example for simulated Skull CT data - 2D
+
+Note: So far only works for phantom_number = '70100644'
 """
 
 import numpy as np
@@ -9,13 +11,16 @@ import adutils
 reco_space = adutils.get_discretization(use_2D=True)
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space, use_2D=True)
+A = adutils.get_ray_trafo(reco_space, 
+                          use_2D=True)
 
 # Define fbp
-fbp = adutils.get_fbp(A, use_2D=True)
+fbp = adutils.get_fbp(A, 
+                      use_2D=True)
 
 # Data
-rhs = adutils.get_data(A, use_2D=True)
+rhs = adutils.get_data(A, 
+                       use_2D=True)
 
 # Reconstruct
 x = fbp(rhs)

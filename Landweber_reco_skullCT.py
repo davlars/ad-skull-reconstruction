@@ -6,14 +6,19 @@ import numpy as np
 import os
 import adutils
 
+# Define phantom name (or use default '70100644')
+phantom_number = '70100644'
+
 # Discretization
-reco_space = adutils.get_discretization()
+reco_space = adutils.get_discretization(phantom_number=phantom_number)
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space)
+A = adutils.get_ray_trafo(reco_space,
+                          phantom_number=phantom_number)
 
 # Data
-rhs = adutils.get_data(A)
+rhs = adutils.get_data(A,
+                       phantom_number=phantom_number)
 
 # Reconstruct
 callbackShowReco = (odl.solvers.CallbackPrintIteration() &

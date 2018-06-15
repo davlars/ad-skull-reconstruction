@@ -7,14 +7,19 @@ import numpy as np
 import os
 import adutils
 
+# Define phantom name (or use default '70100644')
+phantom_number = '70100644'
+
 # Discretization
-reco_space = adutils.get_discretization()
+reco_space = adutils.get_discretization(phantom_number=phantom_number)
 
 # Forward operator (in the form of a broadcast operator)
-A = adutils.get_ray_trafo(reco_space)
+A = adutils.get_ray_trafo(reco_space,
+                          phantom_number=phantom_number)
 
 # Data
-rhs = adutils.get_data(A)
+rhs = adutils.get_data(A,
+                       phantom_number=phantom_number)
 
 # Gradient operator
 gradient = odl.Gradient(reco_space, method='forward')
@@ -63,8 +68,11 @@ callbackShowReco = (odl.solvers.CallbackPrintIteration() &  # Print iterations
 
 callbackPrintIter = odl.solvers.CallbackPrintIteration()
 
-# Use initial guess
-x = adutils.get_initial_guess(reco_space)
+# Start with initial guess, so far only for '70100644'
+if phantom_number == '70100644':
+    x = adutils.get_initial_guess(reco_space)
+else:
+    x = x = reco_space.zero()
 
 # Run such that last iteration is saved (saveReco = 1) or none (saveReco = 0)
 saveReco = False
