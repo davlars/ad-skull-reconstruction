@@ -19,14 +19,16 @@ import adutils
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(dir_path, 'data', 'Simulated', '120kV')
 
-#Default pahntom_number
-phantom_number = '70100644'
+PHANTOM_NUMBERS = ['70100644', '70114044', '70122044', '70135144',
+                   '70141544', '70153744', '70162244']
+DEFAULT_PHANOM_NUMBER = PHANTOM_NUMBERS[0]
+DEFAULT_REBIN_FACTOR = 10
 
 nTurns = 23
 PY3 = (sys.version_info > (3, 0))
 
 
-def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_number=phantom_number):
+def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_number=DEFAULT_PHANOM_NUMBER):
     """Load all the needed data from the nas onto your local machine
 
     This makes loading files much faster.
@@ -36,7 +38,7 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_numb
     python -c "import adutils; adutils.load_data_from_nas('Z:/')"
     """
     phantom_name = phantom_number + 'Phantom_labelled'
-    
+
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
@@ -54,19 +56,19 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_numb
         raise IOError('Cannot find NAS data at {}'.format(nas_phantom_path))
 
     if load_phantom:
-        glb = glob.glob(os.path.join(nas_phantom_path, '*_no_bed*.*'))
-        for filename in tqdm.tqdm(glb, 'loading phantoms'):
-            shutil.copy(filename, data_path)
+        filename = os.path.join(nas_phantom_path,
+                                phantom_number + 'Phantom_labelled_no_bed.nii')
+        shutil.copy(filename, data_path)
 
 
-def get_discretization(phantom_number = phantom_number, use_2D=False):    
+def get_discretization(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False):
     # Set geometry for discretization
     pixelSize = 0.44921875
     phantomShape = adutils.get_phantom(phantom_number=phantom_number, use_2D=use_2D).shape
     if use_2D:
-        volumeSize = np.array([np.round(phantomShape[0]*pixelSize), 
+        volumeSize = np.array([np.round(phantomShape[0]*pixelSize),
                                np.round(phantomShape[1]*pixelSize)])
-        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2, 
+        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2,
                                   -np.round(phantomShape[1]*pixelSize)/2])
         #volumeSize = np.array([230.0, 230.0])
         #volumeOrigin = np.array([-115.0, -115.0])
@@ -76,10 +78,10 @@ def get_discretization(phantom_number = phantom_number, use_2D=False):
                             phantomShape[1]])
         #nVoxels = np.array([512, 512])
     else:
-        volumeSize = np.array([np.round(phantomShape[0]*pixelSize), 
+        volumeSize = np.array([np.round(phantomShape[0]*pixelSize),
                                np.round(phantomShape[1]*pixelSize),
                                np.round(phantomShape[2]*pixelSize)])
-        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2, 
+        volumeOrigin = np.array([-np.round(phantomShape[0]*pixelSize)/2,
                                   -np.round(phantomShape[1]*pixelSize)/2,
                                   0])
         #volumeSize = np.array([230.0, 230.0, 141.0546875])
@@ -98,16 +100,16 @@ def get_discretization(phantom_number = phantom_number, use_2D=False):
     return reco_space
 
 
-def get_ray_trafo(reco_space, 
-                  use_subset=False, 
+def get_ray_trafo(reco_space,
+                  use_subset=False,
                   use_rebin=False,
-                  rebin_factor=10, 
-                  use_window=False, 
+                  rebin_factor=DEFAULT_REBIN_FACTOR,
+                  use_window=False,
                   use_2D=False,
-                  phantom_number=phantom_number):
-    
+                  phantom_number=DEFAULT_PHANOM_NUMBER):
+
     file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'
-    
+
     if use_2D:
         print("Loading geometry")
         geomFile = os.path.join(data_path, (file_start + 'Dose150mGy_2D.geometry.p'))
@@ -134,7 +136,6 @@ def get_ray_trafo(reco_space,
                           'adutils.load_data_from_nas()'.format(data_path))
 
         for turn in turns:
-            print("Loading geometry for turn number {} out of {}".format(turn + 1, nTurns))
             if use_rebin:
                 geomFile = os.path.join(data_path, (file_start + 'Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.geometry.p'))
             else:
@@ -187,7 +188,7 @@ def get_fbp(A, use_2D=False):
 
 
 def get_initial_guess(space):
-    """Get initial FBP guess for more refined reconstruction techniques. 
+    """Get initial FBP guess for more refined reconstruction techniques.
 
     Note: so far this only works with the 70100644Phantom_labelled_no_bed.nii-phantom
     """
@@ -199,27 +200,28 @@ def get_initial_guess(space):
     return space.element(arr)
 
 
-def get_data(A, use_subset=False, 
-             use_rebin=False, 
-             rebin_factor=10,
-             use_window=False, 
-             use_2D=False, 
+def get_data(A, use_subset=False,
+             use_rebin=False,
+             rebin_factor=DEFAULT_REBIN_FACTOR,
+             use_window=False,
+             use_2D=False,
              flip_data=False,
-             phantom_number=phantom_number):
-    
+             beam_hardening=True,
+             phantom_number=DEFAULT_PHANOM_NUMBER):
+
     file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'
 
     if use_2D:
         print("Loading data")
         dataFile = os.path.join(data_path, (file_start + 'Dose150mGy_2D.data.npy'))
         projections = np.load(dataFile).astype('float32')
-        
+
         if flip_data:
         # Flip first component of detector due to ODL-fix #1245. Only if using old input data
             projections = projections[:, ::-1]
             #print("Saving file")
             #np.save(dataFile, projections)
-        
+
         logdata = -np.log(projections / np.max(projections))
 
         rhs = A.range.element(logdata)
@@ -236,8 +238,7 @@ def get_data(A, use_subset=False,
                           'adutils.load_data_from_nas()'.format(data_path))
 
         imagesTurn = []
-        for turn in turns:
-            print("Loading data for turn number {} out of {}".format(turn + 1, nTurns))
+        for turn in tqdm.tqdm(turns, 'Loading data'):
             if use_rebin:
                 dataFile = os.path.join(data_path, (file_start + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_' + str(rebin_factor) + '.data.npy'))
             else:
@@ -250,9 +251,12 @@ def get_data(A, use_subset=False,
                 #print("Saving file")
                 #np.save(dataFile, projections)
 
-            logdata = -np.log(projections / 8120)
-            
-            
+            logdata = -np.log(projections / 6800)
+
+            if beam_hardening:
+                logdata = (logdata + 3.0e-2 * logdata ** 2) / (1 + 3e-2)
+
+
             if use_window:
                 window = odl.tomo.tam_danielson_window(A[turn].operator,  # TODO: ugly
                                                        smoothing_width=0.05,
@@ -266,7 +270,7 @@ def get_data(A, use_subset=False,
     return rhs
 
 
-def get_phantom(phantom_number = phantom_number, use_2D = False, get_Flags = False):
+def get_phantom(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False, get_Flags=False):
     phantom_name = phantom_number + 'Phantom_labelled_no_bed.nii'
     #nifit data
     #path = '/lcrnas/Reference/CT/GPUMCI simulations/code/AD_GPUMCI/phantoms/'
@@ -274,7 +278,6 @@ def get_phantom(phantom_number = phantom_number, use_2D = False, get_Flags = Fal
     nii = nib.load(phantom)
     label = nii.get_data()
     label = np.asarray(label, dtype=np.float)
-    label = np.flipud(label) #Get correct orientation
     label = np.rot90(label) #Get correct orientation
     label[label == 2] = 5 #Shiftbone
     label[label == 3] = 2 #Shift grey matter
@@ -282,11 +285,21 @@ def get_phantom(phantom_number = phantom_number, use_2D = False, get_Flags = Fal
     label[label == 5] = 4 #Shift bone
 
     if not get_Flags:
-        label[label == 0] = 0 #Mass attenuation air
-        label[label == 1] = 0.019696 #Mass attenuation csf (HU: 15)
-        label[label == 2] = 0.020183 #Mass attenuation grey matter (HU: 40)
-        label[label == 3] = 0.019884 #Mass attenuation white matter (HU: 25)
-        label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)
+        if 0:
+            # Exact values from spectrum
+            label[label == 0] = 0 #Mass attenuation air
+            label[label == 1] = 0.019696 #Mass attenuation csf (HU: 15)
+            label[label == 2] = 0.020183 #Mass attenuation grey matter (HU: 40)
+            label[label == 3] = 0.019884 #Mass attenuation white matter (HU: 25)
+            label[label == 4] = 0.04942  #Mass attenuation bone (HU: 1550)
+        else:
+            # Values from simulation
+            label[label == 0] = 0 #Mass attenuation air
+            label[label == 1] = 0.021372 #Mass attenuation csf (HU: 15)
+            label[label == 2] = 0.021601 #Mass attenuation grey matter (HU: 40)
+            label[label == 3] = 0.021451 #Mass attenuation white matter (HU: 25)
+            label[label == 4] = 0.049535 #Mass attenuation bone (HU: 1550)
+
 
     if use_2D:
         label = label[...,172]
@@ -294,10 +307,10 @@ def get_phantom(phantom_number = phantom_number, use_2D = False, get_Flags = Fal
     return label
 
 
-def plot_data(x, phantom_number=phantom_number, plot_separately=False, clim = (0.018, 0.022)):
-    
+def plot_data(x, phantom_number=DEFAULT_PHANOM_NUMBER, plot_separately=False, clim = (0.018, 0.022)):
+
     phantom_name = phantom_number + 'Phantom_no_bed.nii'
-       
+
     cmap = cm.Greys_r
     x = np.array(x)
 
@@ -438,19 +451,21 @@ def plot_data(x, phantom_number=phantom_number, plot_separately=False, clim = (0
         else:
             print('Phantom not recognized. Has it really been simulated?')
 
-def rebin_data(rebin_factor=10, phantom_number=phantom_number, plot_rebin=False):
+def rebin_data(rebin_factor=DEFAULT_REBIN_FACTOR,
+               phantom_number=DEFAULT_PHANOM_NUMBER,
+               plot_rebin=False):
 
-    file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'    
-   
+    file_start = 'HelicalSkullCT_' + phantom_number + 'Phantom_no_bed_'
+
     if 4000 % rebin_factor:
         raise IOError('Cannot rebin data %i projections with rebin factor %i' %(4000,rebin_factor))
 
     if not os.path.exists(data_path):
         raise IOError('Could not find files at {}, have you run '
                       'adutils.load_data_from_nas()'.format(data_path))
-    for turn in range(23):
+
+    for turn in tqdm.tqdm(range(23), "Rebinning data"):
         myFile = os.path.join(data_path,(file_start + 'Dose150mGy_Turn_' + str(turn) + '.data.npy'))
-        print("Rebinning data for turn number {} out of {}".format(turn + 1, nTurns))
         projections = np.load(myFile)
         size = np.array(np.shape(projections))
         sizeNew = size
@@ -462,7 +477,6 @@ def rebin_data(rebin_factor=10, phantom_number=phantom_number, plot_rebin=False)
         saveName = os.path.join(data_path,(file_start + 'Dose150mGy_Turn_' + str(turn) + '_rebinFactor_'+str(rebin_factor) + '.data.npy'))
         np.save(saveName,projection_rebin)
 
-        print("Rebinning geometry for turn number {} out of {}".format(turn + 1, nTurns))
         geomFile = os.path.join(data_path,(file_start + 'Turn_' + str(turn) + '.geometry.p'))
         with open(geomFile, 'rb') as f:
             if PY3:
@@ -474,13 +488,7 @@ def rebin_data(rebin_factor=10, phantom_number=phantom_number, plot_rebin=False)
         angle_partition = odl.uniform_partition(2 * np.pi * turn,
                                                 2 * np.pi * (turn + 1),
                                                 nProjection)
-#        geom_rebin = odl.tomo.HelicalConeFlatGeometry(angle_partition,
-#                                                    geom.det_partition,
-#                                                    src_radius=geom.src_radius,
-#                                                    det_radius=geom.det_radius,
-#                                                    pitch=geom.pitch,
-#                                                    pitch_offset=geom.pitch_offset)
-        
+
         geom_rebin = odl.tomo.ConeFlatGeometry(angle_partition,
                                                geom.det_partition,
                                                src_radius=geom.src_radius,
@@ -501,6 +509,20 @@ def rebin_data(rebin_factor=10, phantom_number=phantom_number, plot_rebin=False)
         ax.imshow(projectionsTot[:,:,10])
         ax.set_aspect('auto')
 
+
+def load_and_rebin_all_from_nas(nas_path, rebin_factor=DEFAULT_REBIN_FACTOR, plot_rebin=False):
+    for phantom_number in PHANTOM_NUMBERS:
+        print('Loading: {}'.format(phantom_number))
+
+        load_data_from_nas(nas_path,
+                           load_data=True,
+                           load_phantom=True,
+                           phantom_number=phantom_number)
+        rebin_data(rebin_factor=rebin_factor,
+                   phantom_number=phantom_number,
+                   plot_rebin=plot_rebin)
+
+
 def save_image(data, filename, as_nii=True, as_npy=True):
     data = np.asarray(data)
     if as_nii == True:
@@ -508,8 +530,8 @@ def save_image(data, filename, as_nii=True, as_npy=True):
         filename_nii = filename + '.nii'
         nib.save(new_image, filename_nii)
     if as_npy == True:
-        filename_npy = filename + 'npy'
-        np.save(filename, data)
+        filename_npy = filename + '.npy'
+        np.save(filename_npy, data)
 
 
 
