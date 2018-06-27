@@ -298,7 +298,7 @@ def get_phantom(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False, get_Flags=Fa
             label[label == 1] = 0.021372 #Mass attenuation csf (HU: 15)
             label[label == 2] = 0.021601 #Mass attenuation grey matter (HU: 40)
             label[label == 3] = 0.021451 #Mass attenuation white matter (HU: 25)
-            label[label == 4] = 0.049535 #Mass attenuation bone (HU: 1550)
+            label[label == 4] = 0.048035 #Mass attenuation bone (HU: 1550)
 
 
     if use_2D:
