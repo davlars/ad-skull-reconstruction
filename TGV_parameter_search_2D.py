@@ -55,8 +55,9 @@ def optimal_parameters(reconstruction, fom, phantoms, data,
 
     def func(lam):
         # Function to be minimized by scipy
-        return sum(fom(reconstruction(datai, lam), phantomi)
-                   for phantomi, datai in zip(phantoms, data))
+        result = sum(fom(reconstruction(datai, lam), phantomi)
+                     for phantomi, datai in zip(phantoms, data))
+        return result + 0.001 * np.sum(lam**2)
 
     # Pick resolution to fit the one used by the space
     tol = np.finfo(phantoms[0].space.dtype).resolution * 10
@@ -179,3 +180,6 @@ def fom(x1, x2):
 optimal_parameters = optimal_parameters(reconstruction,  fom,
                                         phantoms, datas,
                                         initial_param=initial_param)
+
+optimal_recon = reconstruction(datas[0], optimal_parameters)
+optimal_recon.show(clim=[0.018, 0.022])
