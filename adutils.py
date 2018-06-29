@@ -302,7 +302,7 @@ def get_phantom(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False, get_Flags=Fa
 
 
     if use_2D:
-        label = label[...,172]
+        label = label[..., 172]
 
     return label
 
