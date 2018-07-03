@@ -21,8 +21,6 @@ import os
 root_path = os.path.dirname(__file__)
 
 
-requires = open(os.path.join(root_path, 'requirements.txt')).readlines()
-
 setup(
     name='adutils',
     version='0.1',
