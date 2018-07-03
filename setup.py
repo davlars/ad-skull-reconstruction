@@ -29,5 +29,9 @@ setup(
     description='ad-skull-reconstruction',
     url='https://github.com/davlars/ad-skull-reconstruction',
     package_dir={'adutils': 'adutils'},
-    install_requires=[requires]
+    install_requires=['nibabel',
+                      'tqdm',
+                      'matplotlib',
+                      'astra-toolbox',
+                      'odl>=0.6.1.dev0']
 )

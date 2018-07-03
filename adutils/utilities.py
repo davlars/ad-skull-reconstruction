@@ -44,7 +44,7 @@ __all__ = ('PHANTOM_NUMBERS',
 
 
 def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_number=DEFAULT_PHANOM_NUMBER):
-    """Load all the needed data from the nas onto your local machine
+    """Load the data for one patient from the nas onto your local machine.
 
     This makes loading files much faster.
 
@@ -526,6 +526,14 @@ def rebin_data(rebin_factor=DEFAULT_REBIN_FACTOR,
 
 
 def load_and_rebin_all_from_nas(nas_path, rebin_factor=DEFAULT_REBIN_FACTOR, plot_rebin=False):
+    """Load all the needed data from the nas onto your local machine.
+
+    This makes loading files much faster.
+
+    Usage on windows where nas is bound to "Z:/"
+
+    python -c "import adutils; adutils.load_and_rebin_all_from_nas('Z:/')"
+    """
     for phantom_number in PHANTOM_NUMBERS:
         print('Loading: {}'.format(phantom_number))
 
