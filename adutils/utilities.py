@@ -14,7 +14,6 @@ import nibabel as nib
 import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import adutils
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(dir_path, 'data', 'Simulated', '120kV')
@@ -26,6 +25,22 @@ DEFAULT_REBIN_FACTOR = 10
 
 nTurns = 23
 PY3 = (sys.version_info > (3, 0))
+
+
+__all__ = ('PHANTOM_NUMBERS',
+           'DEFAULT_PHANOM_NUMBER',
+           'DEFAULT_REBIN_FACTOR',
+           'load_data_from_nas',
+           'get_discretization',
+           'get_ray_trafo',
+           'get_fbp',
+           'get_initial_guess',
+           'get_data',
+           'get_phantom',
+           'plot_data',
+           'rebin_data',
+           'load_and_rebin_all_from_nas',
+           'save_image')
 
 
 def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_number=DEFAULT_PHANOM_NUMBER):
@@ -64,7 +79,7 @@ def load_data_from_nas(nas_path, load_data=True, load_phantom=True, phantom_numb
 def get_discretization(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False):
     # Set geometry for discretization
     pixelSize = 0.44921875
-    phantomShape = adutils.get_phantom(phantom_number=phantom_number, use_2D=use_2D).shape
+    phantomShape = get_phantom(phantom_number=phantom_number, use_2D=use_2D).shape
     if use_2D:
         volumeSize = np.array([np.round(phantomShape[0]*pixelSize),
                                np.round(phantomShape[1]*pixelSize)])
