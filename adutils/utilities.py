@@ -12,7 +12,6 @@ import shutil
 import pickle
 import nibabel as nib
 import tqdm
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -324,6 +323,8 @@ def get_phantom(phantom_number=DEFAULT_PHANOM_NUMBER, use_2D=False, get_Flags=Fa
 
 def plot_data(x, phantom_number=DEFAULT_PHANOM_NUMBER, plot_separately=False, clim = (0.018, 0.022)):
 
+    import matplotlib.pyplot as plt
+
     phantom_name = phantom_number + 'Phantom_no_bed.nii'
 
     cmap = cm.Greys_r
@@ -519,6 +520,7 @@ def rebin_data(rebin_factor=DEFAULT_REBIN_FACTOR,
             projectionsTot = np.append(projectionsTot,projection_rebin,axis = 0)
 
     if plot_rebin == True:
+        import matplotlib.pyplot as plt
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.imshow(projectionsTot[:,:,10])
